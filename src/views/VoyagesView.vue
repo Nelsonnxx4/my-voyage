@@ -92,7 +92,7 @@
             <div
               class="absolute inset-2 bg-gradient-to-t from-black/10 to-transparent rounded-lg"
             ></div>
-            <button
+            <!-- <button
               @click.stop="toggleFavorite(voyage.id)"
               class="absolute top-5 right-5 bg-white/90 dark:bg-dark-background100 hover:bg-white dark:hover:bg-dark-background100 rounded-full p-2 shadow-sm transition-all z-10"
             >
@@ -103,7 +103,7 @@
                   'text-gray-400': !isFavorite(voyage.id),
                 }"
               />
-            </button>
+            </button> -->
           </div>
 
           <!-- Content -->
@@ -145,7 +145,7 @@
                 class="text-sm font-medium text-accent50 hover:text-accent70 transition-colors flex items-center gap-1 hover:underline"
               >
                 View details
-                <ArrowRightIcon size="14" class="mt-0.5" />
+                <!-- <ArrowRightIcon size="14" class="mt-0.5" /> -->
               </button>
             </div>
           </div>
@@ -224,16 +224,16 @@ const {
 
 const { userData } = useUserProfile();
 
-const favorites = ref<string[]>([]);
-const isFavorite = (id: string) => favorites.value.includes(id);
-const toggleFavorite = (id: string) => {
-  const index = favorites.value.indexOf(id);
-  if (index > -1) {
-    favorites.value.splice(index, 1);
-  } else {
-    favorites.value.push(id);
-  }
-};
+// const favorites = ref<string[]>([]);
+// const isFavorite = (id: string) => favorites.value.includes(id);
+// const toggleFavorite = (id: string) => {
+//   const index = favorites.value.indexOf(id);
+//   if (index > -1) {
+//     favorites.value.splice(index, 1);
+//   } else {
+//     favorites.value.push(id);
+//   }
+// };
 
 const getFirstImageUrl = (imageUrls: any): string | null => {
   try {

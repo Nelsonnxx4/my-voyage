@@ -1,7 +1,6 @@
+// date-and-timeUtils.ts
 import { formatDistanceToNow, formatDistance, isFuture } from "date-fns";
-import { useUserProfile } from "@/composables/useUserProfile";
-
-const { userData } = useUserProfile();
+import type { UserProfile } from "@/types/user";
 
 export const dateAndTime = () => {
   const relativeTripDate = (dates: [Date | string, Date | string]): string => {
@@ -48,11 +47,15 @@ export const dateAndTime = () => {
     }
   };
 
-  const joinedAgo = getJoinedAgo(userData.value?.created_at);
+  // Remove the direct useUserProfile call and accept userData as parameter
+  const getJoinedAgoForUser = (userData: UserProfile | null) => {
+    return getJoinedAgo(userData?.created_at);
+  };
 
   return {
-    joinedAgo,
+    getJoinedAgoForUser,
     relativeTripDate,
     relativeCreatedAt,
+    getJoinedAgo,
   };
 };

@@ -422,15 +422,16 @@ import LogoutModal from "@/components/LogoutModal.vue";
 import ReusableButton from "@/components/ui/ReusableButton.vue";
 import ReusableInput from "@/components/ui/ReusableInput.vue";
 import Spinner from "@/components/ui/Spinner.vue";
+import { useAuth } from "@/composables/useAuth";
 import { useUserProfile } from "@/composables/useUserProfile";
 import { useAvatarAbbreviation } from "@/composables/useAvatarAbbreviation";
-import { UserModal } from "@/utils/userModal";
+import { useUserModal } from "@/utils/userModal";
 import { dateAndTime } from "@/utils/date-and-timeUtils";
 import { tabs } from "@/constants/userConstant";
 import DeleteAccountModal from "./DeleteAccountModal.vue";
 import EditIcon from "@/assets/icons/EditIcon.vue";
 
-const { joinedAgo } = dateAndTime();
+const { handleLogout } = useAuth();
 
 const {
   activeTab,
@@ -440,7 +441,6 @@ const {
   closeLogoutModal,
   openDeleteAccountModal,
   closeDeleteAccountModal,
-  confirmLogout,
   confirmDeleteAccount,
   isEditingProfile,
   editForm,
@@ -460,7 +460,7 @@ const {
   theme,
   setTheme,
   availableThemes,
-} = UserModal();
+} = useUserModal();
 
 const {
   maskedEmail,
@@ -472,6 +472,9 @@ const {
   clearError,
 } = useUserProfile();
 
+const { getJoinedAgoForUser } = dateAndTime();
+
+const joinedAgo = getJoinedAgoForUser(userData.value);
 const router = useRouter();
 
 const navigateToPricing = () => {
@@ -497,6 +500,11 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const { abbreviation } = useAvatarAbbreviation(props.username);
+
+const confirmLogout = () => {
+  console.log("Logging out from all devices...");
+  handleLogout();
+};
 
 const placeholderColor = computed(() => {
   if (!props.username) return "#cccccc";

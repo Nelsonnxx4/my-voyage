@@ -8,7 +8,9 @@
         >
           Choose Your Plan
         </h1>
-        <p class="mt-5 max-w-xl mx-auto text-xl text-gray-500">
+        <p
+          class="mt-5 max-w-xl mx-auto text-lg lg:text-xl leading-5 text-gray-500"
+        >
           Select the plan that works best for your needs
         </p>
       </div>
@@ -97,8 +99,8 @@
 
             <!-- No Button for Free Plan when user is Free -->
             <div
-              v-else-if="plan.id === 'free' && !isPremiumUser"
-              class="mt-8 block w-full py-3 px-6 text-center text-sm text-gray-500 italic"
+              v-else-if="plan.name === 'Free/Basic' && !isPremiumUser"
+              class="mt-8 block w-full py-3 px-6 text-center text-normal text-accent100 italic"
             >
               You're on this plan
             </div>
@@ -160,30 +162,12 @@
           </div>
         </div>
       </div>
-
-      <!-- CTA Section -->
-      <div
-        class="mt-24 bg-gradient-to-r from-accent100 to-accent200 rounded-2xl p-12 text-center"
-      >
-        <h2 class="text-3xl font-bold text-white mb-4">
-          Ready to Start Your Journey?
-        </h2>
-        <p class="text-xl text-white/90 mb-8">
-          Join thousands of travelers documenting their adventures
-        </p>
-        <button
-          @click="scrollToPlans"
-          class="inline-block px-8 py-4 bg-white text-accent100 rounded-lg font-semibold hover:bg-gray-100 transition-colors shadow-lg"
-        >
-          Choose Your Plan
-        </button>
-      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { useAuth } from "@/composables/useAuth";
 import { usePremium } from "@/composables/usePremium";
@@ -259,36 +243,31 @@ const loadPlans = async () => {
 onMounted(async () => {
   await loadPlans();
 
-  // Check for success query param
   if (router.currentRoute.value.query.success) {
     showSuccess.value = true;
     setTimeout(() => (showSuccess.value = false), 5000);
   }
 });
 
-// Check if this is the user's current plan
 const isCurrentPlan = (plan: Plan): boolean => {
   if (!user.value) return false;
 
-  if (plan.id === "free" && !isPremiumUser.value) {
+  if (plan.name === "Free/Basic" && !isPremiumUser.value) {
     return true;
   }
 
-  if (plan.id === "premium" && isPremiumUser.value) {
+  if (plan.name === "premium" && isPremiumUser.value) {
     return true;
   }
 
   return false;
 };
 
-// Determine if button should be shown
 const shouldShowButton = (plan: Plan): boolean => {
-  // Free plan: no button when user is on free
-  if (plan.id === "free" && !isPremiumUser.value) {
+  if (plan.name === "Free/Basic" && !isPremiumUser.value) {
     return false;
   }
 
-  // Show button for all other cases
   return true;
 };
 
@@ -314,7 +293,6 @@ const getButtonClass = (plan: Plan): string => {
   return "bg-white text-gray-800 hover:bg-gray-50 border-gray-300 hover:border-accent100";
 };
 
-// Get button text based on plan state
 const getButtonText = (plan: Plan): string => {
   if (isCurrentPlan(plan)) {
     return "Current Plan";
@@ -324,16 +302,14 @@ const getButtonText = (plan: Plan): string => {
     return "Processing...";
   }
 
-  // Free plan logic
-  if (plan.id === "free") {
+  if (plan.name === "Free/Basic") {
     if (isPremiumUser.value) {
       return "Downgrade to Free";
     }
     return "Continue with Free";
   }
 
-  // Premium plan logic
-  if (isPremiumUser.value && plan.id !== "free") {
+  if (isPremiumUser.value && plan.name !== "Free/Basic") {
     return "Manage Subscription";
   }
 
@@ -353,24 +329,20 @@ const getPlanBorderClass = (plan: Plan): string => {
   return "border-gray-200";
 };
 
-// Handle plan selection
 const handlePlanSelection = async (plan: Plan) => {
   if (!plan.prices?.[0]?.id) {
     alert("No price available for this plan.");
     return;
   }
 
-  // Free plan handling
-  if (plan.id === "free") {
+  if (plan.name === "Free/Basic") {
     if (isPremiumUser.value) {
       const confirmed = confirm(
         "Are you sure you want to downgrade to the Free plan? You'll lose access to premium features at the end of your billing period."
       );
       if (confirmed) {
-        router.push("/account/manage-subscription");
+        router.push("/voyages");
       }
-    } else {
-      router.push("/voyages");
     }
     return;
   }
@@ -381,7 +353,6 @@ const handlePlanSelection = async (plan: Plan) => {
     return;
   }
 
-  // Premium plan upgrade
   try {
     loadingPlan.value = plan.id;
 
@@ -391,7 +362,6 @@ const handlePlanSelection = async (plan: Plan) => {
 
     await upgradeUser(plan.prices[0].id);
 
-    // Update local state
     if (user.value) {
       user.value.is_premium = true;
       isPremiumUser.value = true;
@@ -407,14 +377,6 @@ const handlePlanSelection = async (plan: Plan) => {
   } finally {
     loadingPlan.value = null;
   }
-};
-
-// Scroll to plans section
-const scrollToPlans = () => {
-  window.scrollTo({
-    top: 300,
-    behavior: "smooth",
-  });
 };
 </script>
 

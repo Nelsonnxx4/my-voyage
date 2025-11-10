@@ -91,12 +91,12 @@
               <span class="text-gray-400">No image available</span>
             </div>
             <div class="absolute top-4 right-4">
-              <button
+              <!-- <button
                 class="bg-white/90 hover:bg-white rounded-full p-2 shadow-sm transition-all"
                 @click.stop="handleToggleFavorite"
               >
                 <HeartIcon size="22" :filled="isFavorite" />
-              </button>
+              </button> -->
             </div>
           </div>
 
@@ -177,7 +177,7 @@
         </div>
         <div>
           <button
-            @click="handleEdit"
+            @click="handleEdit(currentVoyageId)"
             class="w-full flex justify-between items-center py-1.5 hover:bg-gray-50 rounded-lg transition-colors"
           >
             <span>Edit Voyage</span>
@@ -235,7 +235,7 @@ const {
   scrolled,
   isProfileModal,
   isSmallModalOpen,
-  voyageId,
+  // voyageId,
   isLoading,
   error,
   handleFetchSingleVoyage,
@@ -278,7 +278,6 @@ const openShareModal = () => {
 
 const loadVoyageData = async () => {
   try {
-    // Get voyage ID from props or route params
     const id = props.id || route.params.id?.toString();
 
     if (!id) {
@@ -293,7 +292,6 @@ const loadVoyageData = async () => {
 
     if (!success || !voyage.value) {
       console.error("Failed to load voyage data");
-      // Don't redirect immediately, show error state instead
       return;
     }
 
@@ -307,7 +305,6 @@ onMounted(() => {
   loadVoyageData();
 });
 
-// Watch for route changes
 watch(
   () => route.params.id,
   (newId) => {
@@ -317,15 +314,7 @@ watch(
   }
 );
 
-// Also watch for props changes if needed
-watch(
-  () => props.id,
-  (newId) => {
-    if (newId) {
-      loadVoyageData();
-    }
-  }
-);
+
 </script>
 
 <style scoped></style>

@@ -1,20 +1,20 @@
+// userModal.ts
 import { ref, watch } from "vue";
-import { useAuth } from "@/composables/useAuth";
 import { useUserProfile } from "@/composables/useUserProfile";
 import { useTheme } from "@/composables/useTheme";
 import { deleteUserAccount } from "@/services/supabase/auth";
 
-const { handleLogout } = useAuth();
-const {
-  userData,
-  handleUpdateUserProfile,
-  handleUpdateUserEmail,
-  handleUploadUserProfileImage,
-  handleDeleteUserProfileImage,
-  resendUserEmailConfirmation,
-} = useUserProfile();
+export const useUserModal = () => {
+  // Initialize composables inside the function
+  const {
+    userData,
+    handleUpdateUserProfile,
+    handleUpdateUserEmail,
+    handleUploadUserProfileImage,
+    handleDeleteUserProfileImage,
+    resendUserEmailConfirmation,
+  } = useUserProfile();
 
-export const UserModal = () => {
   // Theme management
   const { theme, setTheme, availableThemes } = useTheme();
 
@@ -29,11 +29,6 @@ export const UserModal = () => {
   const openDeleteAccountModal = () => (showDeleteAccountModal.value = true);
 
   const closeDeleteAccountModal = () => (showDeleteAccountModal.value = false);
-
-  const confirmLogout = () => {
-    console.log("Logging out from all devices...");
-    handleLogout();
-  };
 
   // Edit state management
   const isEditingProfile = ref(false);
@@ -271,7 +266,6 @@ export const UserModal = () => {
     activeTab,
     showLogoutModal,
     showDeleteAccountModal,
-    confirmLogout,
     openLogoutModal,
     closeLogoutModal,
     openDeleteAccountModal,
@@ -299,5 +293,7 @@ export const UserModal = () => {
     theme,
     setTheme,
     availableThemes,
+    // User data
+    userData,
   };
 };

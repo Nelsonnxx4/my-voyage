@@ -54,16 +54,13 @@ export const fetchVoyageById = async (
     } = await supabase.auth.getSession();
 
     if (sessionError) {
-      console.log("error", sessionError.message);
       throw new Error("Authentication error" + sessionError.message);
     }
 
     if (!session) {
-      console.log("error");
       throw new Error("User must be authenticated to fetch voyages");
     }
 
-    // FIX: Use the correct endpoint format for single voyage
     const response = await supabaseApi.get(`/voyages?id=eq.${id}`, {
       headers: {
         Authorization: `Bearer ${session.access_token}`,
@@ -72,7 +69,6 @@ export const fetchVoyageById = async (
       },
     });
 
-    // FIX: Return the first item from the array or null if empty
     return response.data?.[0] || null;
   } catch (error: any) {
     console.error("Error fetching voyage:", error);
@@ -118,8 +114,6 @@ export const createVoyage = async (
       throw new Error("User must be authenticated to create a voyage");
     }
 
-    console.log("User authenticated:", session.user.id);
-
     const formatDateForPostgres = (dateString: string) => {
       return new Date(dateString).toISOString().split("T")[0];
     };
@@ -137,8 +131,6 @@ export const createVoyage = async (
       user_id: session.user.id,
       created_at: new Date().toISOString(),
     };
-
-    console.log("Sending data to Supabase:", voyageData);
 
     const response = await supabaseApi.post("/voyages", voyageData, {
       headers: {

@@ -1,4 +1,4 @@
-import { ref, onMounted } from "vue";
+import { ref } from "vue";
 import { useRouter } from "vue-router";
 import {
   signInWithEmail,
@@ -46,14 +46,6 @@ export const useAuth = () => {
       router.push("/login");
     }
   };
-
-  onMounted(async () => {
-    try {
-      await checkAuth();
-    } catch (error) {
-      console.error("onMounted error ", error);
-    }
-  });
 
   // signUp
   const handleSignup = async () => {

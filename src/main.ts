@@ -3,17 +3,13 @@ import "./assets/style.scss";
 import App from "./App.vue";
 import { router } from "./router";
 import PrimeVue from "primevue/config";
-// import { useAuth } from "./composables/useAuth";
-// import { supabase } from "./config/supabase";
+import * as icons from "@/assets/icons/index";
 
 const app = createApp(App);
 
-// supabase.auth.getUser().then(({ data }) => {
-//   const { setUser } = useAuth();
-//   if (data?.user) {
-//     setUser(data.user);
-//   }
-// });
+Object.entries(icons).forEach(([name, component]) => {
+  app.component(name, component);
+});
 
 app.use(router);
 app.use(PrimeVue);

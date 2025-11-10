@@ -193,9 +193,7 @@ export const useVoyageManager = (): VoyageManager => {
     isLoading.value = true;
     error.value = null;
     try {
-      console.log("Fetching voyage with ID:", voyageId);
       const foundVoyage = await fetchVoyageById(voyageId);
-      console.log("Found voyage:", foundVoyage);
 
       if (!foundVoyage) {
         error.value = "Voyage not found";
