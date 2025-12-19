@@ -34,25 +34,6 @@ const routes: AppRouteRecordRaw[] = [
     component: () => import("@/views/AuthCallBackView.vue"),
   },
   {
-    path: "/voyages",
-    name: "voyages",
-    component: () => import("@/views/VoyagesView.vue"),
-    meta: { requiresAuth: true },
-  },
-  {
-    path: "/voyages/:id",
-    name: "singleVoyage",
-    component: () => import("@/views/SingleVoyageView.vue"),
-    meta: { requiresAuth: true },
-    props: true,
-  },
-  {
-    path: "/voyages/:id/edit",
-    name: "editVoyage",
-    component: () => import("@/views/EditVoyageView.vue"),
-    meta: { requiresAuth: true },
-  },
-  {
     path: "/voyages/create",
     name: "CreateVoyage",
     component: () => import("@/views/CreateVoyage.vue"),
@@ -63,6 +44,25 @@ const routes: AppRouteRecordRaw[] = [
     name: "FavouritesVoyage",
     component: () => import("@/views/FavouriteVoyages.vue"),
     meta: { requiresAuth: true, requiresPremium: true },
+  },
+  {
+    path: "/voyages",
+    name: "Voyages",
+    component: () => import("@/views/VoyagesView.vue"),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/voyages/:id",
+    name: "SingleVoyage",
+    component: () => import("@/views/SingleVoyageView.vue"),
+    meta: { requiresAuth: true },
+    props: true,
+  },
+  {
+    path: "/voyages/:id/edit",
+    name: "EditVoyage",
+    component: () => import("@/views/EditVoyageView.vue"),
+    meta: { requiresAuth: true },
   },
   {
     path: "/pricing",

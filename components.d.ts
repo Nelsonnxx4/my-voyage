@@ -12,6 +12,7 @@ declare module 'vue' {
     ConfirmPopup: typeof import('./src/components/ui/ConfirmPopup.vue')['default']
     DeleteAccountModal: typeof import('./src/components/DeleteAccountModal.vue')['default']
     EditVoyageSkeleton: typeof import('./src/components/ui/EditVoyageSkeleton.vue')['default']
+    Footer: typeof import('./src/components/Footer.vue')['default']
     Header: typeof import('./src/components/Header.vue')['default']
     Hero: typeof import('./src/components/Hero.vue')['default']
     LogoutModal: typeof import('./src/components/LogoutModal.vue')['default']

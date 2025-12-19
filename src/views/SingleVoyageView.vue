@@ -7,10 +7,9 @@
       <router-link to="/" class="flex items-center justify-center">
         <Logo />
       </router-link>
-      <USkeleton
-        v-if="isLoading"
-        class="h-4 w-[150px] base rounded-md bg-skeleton"
-      />
+      <div v-if="isDetailLoading">
+        <USkeleton class="h-4 w-[150px] base rounded-md bg-skeleton" />
+      </div>
       <h3 v-else class="text-xl text-textblack100">
         {{ voyage ? `Your trip to ${voyage.location}` : "Voyage Not Found" }}
       </h3>
@@ -34,15 +33,15 @@
     />
   </ReusableModal>
 
-  <div v-if="isLoading">
+  <div v-if="isDetailLoading">
     <SingleVoyageSkeleton />
   </div>
 
-  <div v-else-if="error || !voyage">
+  <div v-else-if="detailError">
     <div
       class="w-full max-w-7xl mx-auto px-4 sm:px-10 lg:px-8 py-6 text-center"
     >
-      <p class="text-red-600 mb-4">{{ error || "Voyage not found" }}</p>
+      <p class="text-red-600 mb-4">{{ detailError || "Voyage not found" }}</p>
       <div class="flex gap-4 justify-center">
         <button
           @click="loadVoyageData"
@@ -71,7 +70,11 @@
     </router-link>
 
     <!-- Main Content -->
-    <div id="journal-content" class="flex flex-col lg:flex-row gap-8 xl:gap-12">
+    <div
+      id="journal-content"
+      v-if="voyage"
+      class="flex flex-col lg:flex-row gap-8 xl:gap-12"
+    >
       <!-- Left Column - Voyage Details -->
       <div class="flex-1">
         <!-- Voyage Card -->
@@ -90,14 +93,6 @@
             >
               <span class="text-gray-400">No image available</span>
             </div>
-            <div class="absolute top-4 right-4">
-              <!-- <button
-                class="bg-white/90 hover:bg-white rounded-full p-2 shadow-sm transition-all"
-                @click.stop="handleToggleFavorite"
-              >
-                <HeartIcon size="22" :filled="isFavorite" />
-              </button> -->
-            </div>
           </div>
 
           <!-- Content -->
@@ -110,7 +105,7 @@
                 {{ voyage.title }}
               </h3>
               <div
-                @click.stop="openOptionsModal(currentVoyageId)"
+                @click.stop="openOptionsModal(voyage.id)"
                 class="cursor-pointer hover:text-gray-700 transition-colors"
               >
                 <VerticalThreeDots fillColor="textblack100" />
@@ -177,7 +172,7 @@
         </div>
         <div>
           <button
-            @click="handleEdit(currentVoyageId)"
+            @click="handleEdit()"
             class="w-full flex justify-between items-center py-1.5 hover:bg-gray-50 rounded-lg transition-colors"
           >
             <span>Edit Voyage</span>
@@ -195,7 +190,7 @@
             @close="isShareModalOpen = false"
           />
           <button
-            @click="handleDeleteVoyage(currentVoyageId)"
+            @click="handleDeleteVoyage(voyage.id)"
             class="w-full flex justify-between items-center py-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
           >
             <span>Delete Voyage</span>
@@ -208,25 +203,31 @@
 </template>
 
 <script setup lang="ts">
+import { onMounted, ref, watch } from "vue";
+import { useRoute } from "vue-router";
+
+import UserModal from "@/components/UserModal.vue";
+import Rating from "@/components/Rating.vue";
+
 import MapView from "@/components/MapView.vue";
 import ShareModal from "@/components/ShareModal.vue";
 import ReusableModal from "@/components/ui/ReusableModal.vue";
 import SingleVoyageSkeleton from "@/components/ui/SingleVoyageSkeleton.vue";
+
+// Icons
 import VerticalThreeDots from "@/assets/icons/VerticalThreeDots.vue";
 import ArrowBack from "@/assets/icons/ArrowBack.vue";
 import EditIcon from "@/assets/icons/EditIcon.vue";
 import CloseIcon from "@/assets/icons/CloseIcon.vue";
 import TrashIcon from "@/assets/icons/TrashIcon.vue";
-import HeartIcon from "@/assets/icons/HeartIcon.vue";
 import LocationIcon from "@/assets/icons/LocationIcon.vue";
 import WhatTimeIcon from "@/assets/icons/WhatTimeIcon.vue";
 import ShareIcon from "@/assets/icons/ShareIcon.vue";
 import Logo from "@/assets/icons/Logo.vue";
+
 import { dateAndTime } from "@/utils/date-and-timeUtils";
 import { useVoyageManager } from "@/composables/useVoyageManager";
 import { useUserProfile } from "@/composables/useUserProfile";
-import { useRoute, useRouter } from "vue-router";
-import { computed, onMounted, ref, watch } from "vue";
 
 const { relativeTripDate, relativeCreatedAt } = dateAndTime();
 
@@ -235,9 +236,8 @@ const {
   scrolled,
   isProfileModal,
   isSmallModalOpen,
-  // voyageId,
-  isLoading,
-  error,
+  isDetailLoading,
+  detailError,
   handleFetchSingleVoyage,
   openProfileModal,
   closeProfileModal,
@@ -245,76 +245,49 @@ const {
   handleEdit,
   handleDeleteVoyage,
   closeModal,
-  toggleFavorite,
-  favorites,
 } = useVoyageManager();
 
 const { userData } = useUserProfile();
 const route = useRoute();
-const router = useRouter();
 
 const isShareModalOpen = ref<boolean>(false);
-const currentVoyageId = ref<string>("");
 
 const props = defineProps<{
   id?: string;
 }>();
-
-const isFavorite = computed(() => {
-  return currentVoyageId.value
-    ? favorites.value.includes(currentVoyageId.value)
-    : false;
-});
-
-const handleToggleFavorite = () => {
-  if (currentVoyageId.value) {
-    toggleFavorite(currentVoyageId.value);
-  }
-};
 
 const openShareModal = () => {
   isShareModalOpen.value = true;
 };
 
 const loadVoyageData = async () => {
+  const id = props.id || route.params.id?.toString();
+
+  if (!id) {
+    console.warn("No voyage ID provided");
+    return;
+  }
+
   try {
-    const id = props.id || route.params.id?.toString();
-
-    if (!id) {
-      console.error("No voyage ID provided");
-      router.push("/voyages");
-      return;
-    }
-
-    currentVoyageId.value = id;
-
-    const success = await handleFetchSingleVoyage(id);
-
-    if (!success || !voyage.value) {
-      console.error("Failed to load voyage data");
-      return;
-    }
-
-    console.log("Voyage loaded successfully:", voyage.value);
+    await handleFetchSingleVoyage(id);
   } catch (error) {
-    console.error("Error loading voyage data:", error);
+    console.error("Error loading voyage:", error);
   }
 };
 
+// Load data on mount
 onMounted(() => {
   loadVoyageData();
 });
 
+// Watch for route changes
 watch(
   () => route.params.id,
-  (newId) => {
-    if (newId) {
+  (newId, oldId) => {
+    // Only reload if the ID actually changed
+    if (newId && newId !== oldId) {
       loadVoyageData();
     }
   }
 );
-
-
 </script>
-
-<style scoped></style>

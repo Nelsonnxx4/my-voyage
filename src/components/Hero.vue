@@ -5,12 +5,12 @@
       id="start"
       class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center"
     >
-      <div
+      <!-- <div
         class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-100 text-gray-600 text-xs mb-4"
       >
         <span class="px-1 py-0.5 rounded bg-black text-white">New</span>
         <span>Make your trips special with Premium Features</span>
-      </div>
+      </div> -->
       <h1
         class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-gray-900 leading-tight"
       >
@@ -24,23 +24,23 @@
         Plan voyages, pin locations, save photos, and export memories. Keep
         everything about your journeys in one delightful place.
       </p>
-      <div class="mt-8 flex items-center justify-center gap-3">
+      <div class="my-8 flex items-center justify-center gap-3">
         <router-link
           to="/signup"
           class="px-5 py-3 rounded-full bg-black text-white shadow hover:bg-gray-800"
         >
           Get Started
         </router-link>
-        <router-link
+        <!-- <router-link
           to="/pricing"
           class="px-5 py-3 rounded-full bg-white border shadow-sm hover:bg-gray-50"
         >
           View Plans
-        </router-link>
+        </router-link> -->
       </div>
 
       <!-- Logo row -->
-      <div
+      <!-- <div
         class="mt-12 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6 items-center text-gray-400"
       >
         <div class="h-10 bg-gray-100 rounded"></div>
@@ -49,6 +49,46 @@
         <div class="h-10 bg-gray-100 rounded"></div>
         <div class="h-10 bg-gray-100 rounded"></div>
         <div class="h-10 bg-gray-100 rounded"></div>
+      </div> -->
+
+      <!-- How it works -->
+
+      <div>
+        <picture class="flex flex-col justify-center items-center">
+          <img
+            src="@/assets/images/Zende_Emty_mobile.png"
+            alt="empty state diagram"
+            class="w-[80%] rotate-6"
+          />
+
+          <!-- arrow down -->
+          <img
+            src="@/assets/images/arrow-down-right.png"
+            alt="arrow down"
+            class="-mt-6 w-[50%]"
+          />
+
+          <!-- create entry -->
+          <img
+            src="@/assets/images/Zende_create_mobile.png"
+            alt="create"
+            class="w-[80%] -rotate-6"
+          />
+
+          <!-- arrow down -->
+          <img
+            src="@/assets/images/arrow-down-right.png"
+            alt="arrow down"
+            class="-mt-4 w-[50%]"
+          />
+
+          <!--  voyage view -->
+          <img
+            src="@/assets/images/Zende_voyage_view_mobile.png"
+            alt="create"
+            class="w-[80%] -rotate-6"
+          />
+        </picture>
       </div>
 
       <!-- Quote -->
@@ -181,6 +221,4 @@
   </main>
 </template>
 
-<script setup lang="ts"></script>
-
-<style scoped></style>
+<script></script>

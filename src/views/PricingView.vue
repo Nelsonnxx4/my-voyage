@@ -1,21 +1,32 @@
 <template>
-  <div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-7xl mx-auto">
-      <!-- Header -->
-      <div class="text-center mb-12">
+  <div class="min-h-screen bg-gray-50">
+    <header
+      :class="[
+        'sticky top-0 z-50 backdrop-blur-md border-b py-2 transition-all duration-300',
+        isScrolled
+          ? 'bg-white/90 backdrop-blur-lg shadow-md'
+          : 'bg-white/70 backdrop-blur-md shadow-sm',
+      ]"
+    >
+      <router-link to="/" class="flex items-center justify-start">
+        <Logo />
+        <h4 class="text-gray-900 font-medium">Zende</h4>
+      </router-link>
+    </header>
+    <div class="max-w-7xl mx-auto px-4 sm:px-4 lg:px-6">   
+      <div class="text-center mt-4 mb-12">
         <h1
-          class="text-4xl font-extrabold text-gray-900 sm:text-5xl sm:tracking-tight lg:text-6xl"
+          class="text-3xl font-semibold text-gray-900 sm:text-5xl sm:tracking-tight lg:text-6xl"
         >
           Choose Your Plan
         </h1>
         <p
-          class="mt-5 max-w-xl mx-auto text-lg lg:text-xl leading-5 text-gray-500"
+          class="mt-2 max-w-xl mx-auto text-normal lg:text-xl leading-5 text-gray-500"
         >
           Select the plan that works best for your needs
         </p>
       </div>
 
-      <!-- Success Message -->
       <div
         v-if="showSuccess"
         class="max-w-md mx-auto mb-8 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded"
@@ -167,12 +178,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 import { useAuth } from "@/composables/useAuth";
 import { usePremium } from "@/composables/usePremium";
 import { fetchSubscriptionPlans } from "@/services/fetchSubscriptionPlans";
 import type { Plan } from "@/types/plans";
+import Logo from "@/assets/icons/Logo.vue";
 
 const router = useRouter();
 const { upgradeUser, checkStatus } = usePremium();
@@ -218,6 +230,19 @@ const faqs = ref([
   },
 ]);
 
+const isScrolled = ref(false);
+
+const handleScroll = () => {
+  isScrolled.value = window.scrollY > 10;
+};
+
+onMounted(() => {
+  window.addEventListener("scroll", handleScroll);
+});
+
+onUnmounted(() => {
+  window.removeEventListener("scroll", handleScroll);
+});
 // Load plans and check premium status
 const loadPlans = async () => {
   try {

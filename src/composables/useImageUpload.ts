@@ -31,7 +31,7 @@ interface ImageActions {
   startResize: (e: MouseEvent, handle: string) => void;
   deleteSelectedImage: () => void;
   uploadImagesToSupabase: () => Promise<string[]>;
-  isPremium: ComputedRef<boolean>;
+  isPremium: boolean;
   maxImagesPerEntry: ComputedRef<number>;
   hasImage: ComputedRef<boolean>;
   showActionButtons: ComputedRef<boolean | string>;
@@ -76,7 +76,6 @@ export const useImageUpload = (formData: Ref<FormDataType>): ImageActions => {
   const rotation = ref(0);
   const handles = ["n", "e", "s", "w", "ne", "nw", "se", "sw"];
 
-  // Temporary storage for base64 images before upload
   const tempImages = ref<{ base64: string; file: File | null }[]>([]);
 
   // premium features
@@ -153,7 +152,6 @@ export const useImageUpload = (formData: Ref<FormDataType>): ImageActions => {
       filesToProcess.splice(allowedNewFiles);
     }
 
-    // Process each file
     filesToProcess.forEach((file) => {
       processImage(file);
     });
@@ -185,13 +183,11 @@ export const useImageUpload = (formData: Ref<FormDataType>): ImageActions => {
 
         const base64Data = e.target.result as string;
 
-        // Store both base64 and file for later upload
         tempImages.value.push({
           base64: base64Data,
           file: file,
         });
 
-        // Use base64 for preview
         formData.value = {
           ...formData.value,
           image_urls: [...formData.value.image_urls, base64Data],
@@ -218,7 +214,6 @@ export const useImageUpload = (formData: Ref<FormDataType>): ImageActions => {
 
   // Upload images to Supabase Storage
   const uploadImagesToSupabase = async (): Promise<string[]> => {
-    // Filter out already uploaded URLs (from editing existing voyages)
     const existingUrls = formData.value.image_urls.filter(
       (url) => url.startsWith("http") && url.includes("supabase.co")
     );
@@ -240,7 +235,6 @@ export const useImageUpload = (formData: Ref<FormDataType>): ImageActions => {
 
       const userFolder = `voyages/${user.id}`;
 
-      // Upload all images in parallel for better performance
       const uploadPromises = tempImages.value.map(async (tempImage, index) => {
         if (!tempImage.file) return null;
 
@@ -264,7 +258,6 @@ export const useImageUpload = (formData: Ref<FormDataType>): ImageActions => {
           const response = await fetch(tempImage.base64);
           const blob = await response.blob();
 
-          // Try Supabase client first (more reliable)
           const { data, error } = await supabase.storage
             .from("voyage-images")
             .upload(filePath, blob, {
@@ -312,17 +305,15 @@ export const useImageUpload = (formData: Ref<FormDataType>): ImageActions => {
       // Wait for all uploads to complete
       const results = await Promise.all(uploadPromises);
 
-      // Filter out failed uploads and add to uploaded URLs
       const successfulUploads = results.filter(
         (url) => url !== null
       ) as string[];
       uploadedUrls.push(...successfulUploads);
 
-      // Clear temp images after successful upload
       tempImages.value = [];
 
       console.log(
-        `🎉 Upload completed: ${successfulUploads.length}/${tempImages.value.length} images uploaded`
+        ` Upload completed: ${successfulUploads.length}/${tempImages.value.length} images uploaded`
       );
       return uploadedUrls;
     } catch (error: any) {
@@ -349,7 +340,6 @@ export const useImageUpload = (formData: Ref<FormDataType>): ImageActions => {
     }
   };
 
-  // Update the delete function to handle multiple images properly
   const deleteSelectedImage = () => {
     if (
       !Array.isArray(formData.value.image_urls) ||
@@ -587,7 +577,7 @@ export const useImageUpload = (formData: Ref<FormDataType>): ImageActions => {
     handleDragLeave,
     deleteSelectedImage,
     uploadImagesToSupabase,
-    // isPremium: isPremium,
+    isPremium: isPremium,
     maxImagesPerEntry: maxImagesPerEntry,
     handles,
     imageStyle,

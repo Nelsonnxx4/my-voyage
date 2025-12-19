@@ -1,6 +1,6 @@
 <template>
   <main
-    class="h-screen pb-5 bg-background100 dark:bg-dark-background100 transition-colors"
+    class="min-h-screen pb-5 bg-background100 dark:bg-dark-background100 transition-colors"
   >
     <header
       class="flex justify-between items-center sticky top-0 z-50 w-full bg-white dark:bg-dark-background100 border-b border-gray-200 dark:border-dark-border100 transition-shadow px-2 py-2"
@@ -35,10 +35,22 @@
 
     <section @click.stop="isMenuOpen = false" class="lg:px-5">
       <div
-        v-if="isLoading"
+        v-if="isListLoading"
         class="md:grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-3 mx-auto"
       >
-        <VoyagesSkeleton v-for="n in voyages" :key="'skeleton-' + n" />
+        <VoyagesSkeleton v-for="n in 6" :key="'skeleton-' + n" />
+      </div>
+      <div
+        v-else-if="listError"
+        class="flex flex-col items-center justify-center py-16 px-4 text-center"
+      >
+        <p class="text-red-500">{{ listError }}</p>
+        <button
+          @click="handleFetchVoyages"
+          class="mt-4 inline-flex items-center px-4 py-2 bg-accent200 dark:bg-dark-accent200 text-white rounded-lg hover:bg-accent300 dark:hover:bg-dark-accent300 transition-colors"
+        >
+          Retry
+        </button>
       </div>
       <div
         v-else-if="!voyages || voyages.length === 0"
@@ -74,7 +86,7 @@
         <article
           v-for="voyage in voyages"
           :key="voyage.id"
-          class="group relative rounded-xl bg-white dark:bg-dark-background100 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden border border-gray-100 dark:border-dark-border100 max-w-[500px] mx-auto"
+          class="relative rounded-xl bg-white dark:bg-dark-background100 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden border border-gray-100 dark:border-dark-border100 min-w-[100px] sm:min-w-[400px] md:min-w-[400px] lg:min-w-[350px] xl:min-w-[450px] mx-auto"
           @click="navigateToVoyage(voyage.id)"
         >
           <!-- Image with Favorite Button -->
@@ -191,7 +203,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { onMounted } from "vue";
 import Rating from "@/components/Rating.vue";
 import ReusableModal from "@/components/ui/ReusableModal.vue";
 import VoyagesSkeleton from "@/components/ui/VoyagesSkeleton.vue";
@@ -207,12 +219,14 @@ import { useUserProfile } from "@/composables/useUserProfile";
 import { dateAndTime } from "@/utils/date-and-timeUtils";
 
 const { relativeCreatedAt } = dateAndTime();
+
 const {
   voyages,
   scrolled,
   isMenuOpen,
   isProfileModal,
-  isLoading,
+  isListLoading,
+  listError,
   toggleMenu,
   navigateToCreate,
   navigateToFavorites,
@@ -220,6 +234,7 @@ const {
   openProfileModal,
   closeProfileModal,
   editVoyage,
+  handleFetchVoyages,
 } = useVoyageManager();
 
 const { userData } = useUserProfile();
@@ -235,6 +250,9 @@ const { userData } = useUserProfile();
 //   }
 // };
 
+onMounted(() => {
+  handleFetchVoyages();
+});
 const getFirstImageUrl = (imageUrls: any): string | null => {
   try {
     if (Array.isArray(imageUrls)) {

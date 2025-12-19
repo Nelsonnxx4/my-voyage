@@ -1,9 +1,9 @@
 <template>
   <section class="flex justify-center items-center">
-    <div v-if="isLoading">
+    <div v-if="isDetailLoading">
       <EditVoyageSkeleton />
     </div>
-    <div v-else-if="error">
+    <div v-else-if="detailError">
       <p class="text-red-600 mb-4">{{ error }}</p>
       <button
         @click="handleFetchSingleVoyage(voyageId)"
@@ -16,7 +16,7 @@
       <div class="flex justify-between items-center mb-5">
         <h4 class="text-textblack100">Edit Voyage</h4>
         <CloseIcon
-          @click="navigateToVoyage(voyageId)"
+          @click="navigateToVoyage(voyage.id)"
           fillColor="textblack100"
           class="cursor-pointer"
         />
@@ -376,6 +376,7 @@
           </button>
           <ReusableButton
             type="submit"
+            @click="handleEditVoyage"
             class="px-4 py-2 bg-accent100 hover:bg-accent50 active:bg-accent50 text-white rounded"
             :disabled="isSubmitting || !hasChanges"
             :label="isSubmitting ? 'Saving...' : 'Save Changes'"
@@ -423,7 +424,9 @@ const route = useRoute();
 
 const {
   voyageId,
-  isLoading,
+  isDetailLoading,
+  detailError,
+  voyage,
   formData,
   handleFetchSingleVoyage,
   navigateToVoyage,
@@ -468,7 +471,7 @@ const {
   maxImagesPerEntry,
 } = useImageUpload(formData);
 
-const { limits, loadUserPlan } = usePremium();
+const { loadUserPlan } = usePremium();
 
 const {
   selectedLocation,

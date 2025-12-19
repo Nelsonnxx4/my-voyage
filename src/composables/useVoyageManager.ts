@@ -19,18 +19,21 @@ interface VoyageManager {
   // State
   voyages: Ref<VoyageTypeInfo[]>;
   voyage: Ref<VoyageTypeInfo | null>;
-  voyageId: Ref<string | null>;
   favorites: Ref<string[]>;
   scrolled: Ref<boolean>;
   isMenuOpen: Ref<boolean>;
   isProfileModal: Ref<boolean>;
   isSmallModalOpen: Ref<boolean>;
-  currentVoyageId: Ref<string | null>;
-  isLoading: Ref<boolean>;
+  // voyageId: Ref<string | null>;
   size: Ref<ModalSize>;
-  error: Ref<string | null>;
   favoriteVoyages: Ref<VoyageTypeInfo[]>;
   formData: Ref<FormDataType>;
+
+  // New separated loading/error states
+  isListLoading: Ref<boolean>;
+  isDetailLoading: Ref<boolean>;
+  listError: Ref<string | null>;
+  detailError: Ref<string | null>;
 
   // Navigation
   toggleMenu: () => void;
@@ -49,7 +52,7 @@ interface VoyageManager {
   // Actions
   editVoyage: (voyageId: string) => void;
   confirmDeleteVoyage: (voyageId: string) => void;
-  // handleEdit: () => void;
+  handleEdit: () => void;
   handleFetchVoyages: () => Promise<void>;
   handleFetchSingleVoyage: (voyageId: string) => Promise<VoyageTypeInfo | null>;
   handleCreateVoyage: (
@@ -64,8 +67,9 @@ interface VoyageManager {
 }
 
 export const useVoyageManager = (): VoyageManager => {
-  const route = useRoute();
+  // const route = useRoute();
   const router = useRouter();
+  const route = useRoute();
   const { limits } = usePremium();
 
   // State
@@ -75,9 +79,7 @@ export const useVoyageManager = (): VoyageManager => {
   const voyages = ref<VoyageTypeInfo[]>([]);
   const voyage = ref<VoyageTypeInfo | null>(null);
   const isSmallModalOpen = ref(false);
-  const currentVoyageId = ref<string | null>(null);
-  const isLoading = ref(true);
-  const error = ref<string | null>(null);
+  const voyageId = ref<string | null>(null);
   const size = ref<ModalSize>("md");
   const favorites = ref<string[]>(
     JSON.parse(localStorage.getItem("favorites") || "[]")
@@ -95,17 +97,10 @@ export const useVoyageManager = (): VoyageManager => {
     longitude: null,
   });
 
-  const voyageId = computed(() => {
-    try {
-      const idParam = route.params?.id;
-      if (!idParam) return null;
-
-      return idParam.toString();
-    } catch (error) {
-      console.error("Error getting voyage ID:", error);
-      return null;
-    }
-  });
+  const isListLoading = ref(true);
+  const isDetailLoading = ref(true);
+  const listError = ref<string | null>(null);
+  const detailError = ref<string | null>(null);
 
   // Event Handlers
   const handleScroll = () => {
@@ -129,8 +124,8 @@ export const useVoyageManager = (): VoyageManager => {
     isMenuOpen.value = false;
   };
 
-  const navigateToVoyage = (voyageId: string) => {
-    router.push(`/voyages/${voyageId}`);
+  const navigateToVoyage = (id: string) => {
+    router.push(`/voyages/${id}`);
     isMenuOpen.value = false;
   };
 
@@ -139,8 +134,8 @@ export const useVoyageManager = (): VoyageManager => {
     isMenuOpen.value = false;
   };
 
-  const navigateToEdit = (voyageId: string) => {
-    router.push(`/voyages/${voyageId}/edit`);
+  const navigateToEdit = (id: string) => {
+    router.push(`/voyages/${id}/edit`);
   };
 
   // Modal fuunctions
@@ -156,59 +151,62 @@ export const useVoyageManager = (): VoyageManager => {
     isProfileModal.value = false;
   };
 
-  const openModal = (voyageId: string, modalSize?: ModalSize) => {
+  const openModal = (id: string, modalSize?: ModalSize) => {
     size.value = modalSize ?? "md";
-    currentVoyageId.value = voyageId;
+    voyageId.value = id;
     isSmallModalOpen.value = true;
   };
 
   const closeModal = () => {
     isSmallModalOpen.value = false;
-    currentVoyageId.value = null;
+    voyageId.value = null;
   };
 
   const openOptionsModal = (voyageId: string) => {
     openModal(voyageId, "sm");
   };
 
-  // Voyage Actions
-
+  //Voyage Actions
   const handleFetchVoyages = async (): Promise<void> => {
     try {
-      isLoading.value = true;
-      error.value = null;
+      isListLoading.value = true;
+      listError.value = null;
       const data = await fetchVoyages();
       voyages.value = data;
     } catch (err) {
-      error.value =
+      listError.value =
         err instanceof Error ? err.message : "Failed to fetch voyages";
     } finally {
-      isLoading.value = false;
+      isListLoading.value = false;
     }
   };
 
   const handleFetchSingleVoyage = async (
     voyageId: string
   ): Promise<VoyageTypeInfo | null> => {
-    isLoading.value = true;
-    error.value = null;
+    isDetailLoading.value = true;
+    detailError.value = null;
+    voyage.value = null;
     try {
       const foundVoyage = await fetchVoyageById(voyageId);
 
       if (!foundVoyage) {
-        error.value = "Voyage not found";
+        detailError.value = "Voyage not found";
+        voyage.value = null;
         return null;
       }
 
-      voyage.value = foundVoyage;
+      voyage.value = foundVoyage ?? null;
       return foundVoyage;
     } catch (err) {
-      error.value =
+      const errorMessage =
         err instanceof Error ? err.message : "Failed to load voyage";
+      detailError.value = errorMessage;
+      voyage.value = null;
       console.error("Error fetching voyage:", err);
       return null;
     } finally {
-      isLoading.value = false;
+      isDetailLoading.value = false;
     }
   };
 
@@ -216,8 +214,8 @@ export const useVoyageManager = (): VoyageManager => {
     newVoyageData: FormDataType
   ): Promise<VoyageTypeInfo | null> => {
     try {
-      isLoading.value = true;
-      error.value = null;
+      isDetailLoading.value = true;
+      detailError.value = null;
       console.log("Creating voyage with data:", newVoyageData);
 
       if (!newVoyageData) {
@@ -269,13 +267,13 @@ export const useVoyageManager = (): VoyageManager => {
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Failed to create voyage";
-      error.value = message;
+      detailError.value = message;
 
       showToast(message, "error");
 
       return null;
     } finally {
-      isLoading.value = false;
+      isDetailLoading.value = false;
     }
   };
 
@@ -284,13 +282,13 @@ export const useVoyageManager = (): VoyageManager => {
     data: FormDataType
   ): Promise<VoyageTypeInfo | null> => {
     try {
-      isLoading.value = true;
-      error.value = null;
+      isDetailLoading.value = true;
+      detailError.value = null;
 
       const updated = await updateVoyage(voyageId, data);
 
+      console.log("1", updated);
       if (updated && typeof updated === "object") {
-        // Update local cache
         const idx = voyages.value.findIndex((v) => v.id === voyageId);
         if (idx !== -1) {
           voyages.value[idx] = updated;
@@ -307,12 +305,12 @@ export const useVoyageManager = (): VoyageManager => {
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Failed to update voyage";
-      error.value = message;
+      detailError.value = message;
 
       showToast(message, "error");
       return null;
     } finally {
-      isLoading.value = false;
+      isDetailLoading.value = false;
     }
   };
 
@@ -321,38 +319,43 @@ export const useVoyageManager = (): VoyageManager => {
     navigateToEdit(voyageId);
   };
 
-  // const handleEdit = () => {
-  //   if (currentVoyageId.value) {
-  //     editVoyage(currentVoyageId.value);
-  //     closeModal();
-  //   }
-  // };
+  const handleEdit = () => {
+    if (voyageId.value) {
+      editVoyage(voyageId.value);
+      closeModal();
+    }
+  };
 
   const handleDeleteVoyage = async (voyageId: string): Promise<void> => {
     try {
-      isLoading.value = true;
-      error.value = null;
+      isDetailLoading.value = true; // Use detail loading
+      detailError.value = null; // Use detail error
 
       await deleteVoyage(voyageId);
       voyages.value = voyages.value.filter((voyage) => voyage.id !== voyageId);
 
       showToast("Voyage deleted", "success");
       closeModal();
+
+      const currentRoutePath = route.path;
+      if (currentRoutePath === `/voyages/${voyageId}`) {
+        voyage.value = null;
+        navigateToVoyages();
+      }
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Failed to delete voyage";
 
-      error.value = message;
+      detailError.value = message;
 
       showToast(message, "error");
     } finally {
-      isLoading.value = false;
+      isDetailLoading.value = false;
     }
   };
-
-  const confirmDeleteVoyage = (voyageId: string) => {
-    currentVoyageId.value = voyageId;
-    openModal(voyageId, "sm");
+  const confirmDeleteVoyage = (id: string) => {
+    voyageId.value = id;
+    openModal(id, "sm");
   };
 
   // Filter favorite voyages
@@ -378,27 +381,28 @@ export const useVoyageManager = (): VoyageManager => {
   // Lifecycle Hooks
   onMounted(async () => {
     window.addEventListener("scroll", handleScroll);
-    await handleFetchVoyages();
   });
 
   onUnmounted(() => {
     window.removeEventListener("scroll", handleScroll);
   });
 
+  // Return new states
   return {
     voyages,
     voyage,
-    voyageId,
     scrolled,
     isMenuOpen,
     isProfileModal,
     isSmallModalOpen,
-    currentVoyageId,
+    // voyageId,
     favoriteVoyages,
-    isLoading,
     size,
-    error,
     formData,
+    isListLoading,
+    isDetailLoading,
+    listError,
+    detailError,
     toggleMenu,
     toggleFavorite,
     navigateToCreate,
@@ -412,7 +416,7 @@ export const useVoyageManager = (): VoyageManager => {
     openOptionsModal,
     editVoyage,
     confirmDeleteVoyage,
-    // handleEdit,
+    handleEdit,
     handleFetchSingleVoyage,
     handleCreateVoyage,
     handleFetchVoyages,

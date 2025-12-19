@@ -61,17 +61,21 @@ export const fetchVoyageById = async (
       throw new Error("User must be authenticated to fetch voyages");
     }
 
-    const response = await supabaseApi.get(`/voyages?id=eq.${id}`, {
+    const response = await supabaseApi.get(`/voyages`, {
       headers: {
         Authorization: `Bearer ${session.access_token}`,
         apiKey: import.meta.env.VITE_SUPABASE_KEY,
         "Content-Type": "application/json",
       },
+      params: {
+        id: `eq.${id}`,
+        select: "*",
+      },
     });
 
-    return response.data?.[0] || null;
+    return response.data?.[0];
   } catch (error: any) {
-    console.error("Error fetching voyage:", error);
+    console.error("❌ Error fetching voyage:", error);
     throw new Error(
       error.response?.data?.message || error.message || "Failed to fetch voyage"
     );
@@ -152,7 +156,7 @@ export const createVoyage = async (
       );
     }
 
-    return response.data;
+    return response.data?.[0] || null;
   } catch (error: any) {
     console.error("Error creating voyage:", {
       message: error.message,
