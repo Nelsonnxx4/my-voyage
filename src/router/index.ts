@@ -65,6 +65,12 @@ const routes: AppRouteRecordRaw[] = [
     meta: { requiresAuth: true },
   },
   {
+    path: "/issues",
+    name: "Issues",
+    component: () => import("@/views/IssuesView.vue"),
+    meta: { requiresAuth: true },
+  },
+  {
     path: "/pricing",
     name: "pricing",
     component: () => import("@/views/PricingView.vue"),

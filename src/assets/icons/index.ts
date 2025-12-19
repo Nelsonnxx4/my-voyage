@@ -1,5 +1,6 @@
 export { default as ArrowBack } from "@/assets/icons/ArrowBack.vue";
 export { default as ArrowForward } from "@/assets/icons/ArrowForward.vue";
+export { default as ArrowOut } from "@/assets/icons/ArrowOut.vue";
 export { default as VerticalThreeDots } from "@/assets/icons/VerticalThreeDots.vue";
 export { default as SkeletonStarIcon } from "@/assets/icons/SkeletonStarIcon.vue";
 export { default as FilledStarIcon } from "@/assets/icons/FilledStarIcon.vue";

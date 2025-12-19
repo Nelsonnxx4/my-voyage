@@ -1,14 +1,48 @@
 <template>
-  <footer class="bg-black">
+  <footer class="bg-black px-2">
     <main>
+      <div class="flex justify-start items-center">
+        <Logo />
+        <h4 class="text-inputColor200 font-medium">Zende</h4>
+      </div>
       <ul>
-        <li>hello</li>
-        <li>heu</li>
-        <li>ccd</li>
-        <li>hdhd</li>
+        <li>
+          <router-link
+            to="/signup"
+            class="text-sm text-white/75 hover:text-white/65 underline"
+          >
+            Get Started
+          </router-link>
+        </li>
+        <li>
+          <router-link
+            to="/signup"
+            class="text-sm text-white/75 hover:text-white/65 underline"
+          >
+            About
+          </router-link>
+        </li>
+        <li>
+          <router-link
+            to="/signup"
+            class="text-sm text-white/75 hover:text-white/65 underline"
+          >
+            Pricing
+          </router-link>
+        </li>
+        <li>
+          <router-link
+            to="/signup"
+            class="text-sm text-white/75 hover:text-white/65 underline"
+          >
+            FAQs
+          </router-link>
+        </li>
       </ul>
     </main>
   </footer>
 </template>
 
-<script></script>
+<script setup lang="ts">
+import Logo from "@/assets/icons/Logo.vue";
+</script>

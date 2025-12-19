@@ -22,8 +22,8 @@ export function setupRouter(routes: AppRouteRecordRaw[]) {
 
     if (to.meta.requiresPremium && user.value) {
       const { checkStatus } = usePremium(user.value.id);
-      const isStillPremium = await checkStatus();
-      if (!isStillPremium) return "/pricing";
+      const isStillPremium: boolean = await checkStatus();
+      if (isStillPremium === false) return "/pricing";
     }
 
     if ((to.path === "/login" || to.path === "/signup") && isAuthenticated) {

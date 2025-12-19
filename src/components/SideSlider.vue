@@ -15,13 +15,13 @@
         class="p-4 border-b border-gray-200 dark:border-dark-border100 flex justify-between items-center"
       >
         <h4 class="font-semibold text-textblack200 dark:text-dark-textblack200">
-          Menu
+          <!-- Menu -->
         </h4>
-        <CloseIcon @click="close" stroke="textblack300" />
+        <CloseIcon @click="close" fillColor="textblack300" />
       </div>
 
       <nav class="flex-1 overflow-y-auto p-4">
-        <ul class="space-y-2">
+        <ul class="pb-10">
           <li v-for="item in NavPaths" :key="item.path">
             <RouterLink
               :to="item.path"
@@ -37,6 +37,13 @@
             </RouterLink>
           </li>
         </ul>
+        <router-link
+          to="/signup"
+          class="flex justify-between items-center px-5 py-3 rounded-full bg-black text-white shadow hover:bg-gray-800"
+        >
+          <span> Get Started </span>
+          <ArrowOut />
+        </router-link>
       </nav>
     </aside>
   </transition>
@@ -44,6 +51,7 @@
 
 <script setup lang="ts">
 import CloseIcon from "@/assets/icons/CloseIcon.vue";
+import ArrowOut from "@/assets/icons/ArrowOut.vue";
 import { NavPaths } from "@/constants/constant";
 import { useRoute } from "vue-router";
 
