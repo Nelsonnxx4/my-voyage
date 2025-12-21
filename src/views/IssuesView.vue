@@ -1,6 +1,13 @@
 <template>
   <div class="min-h-screen bg-gray-50 py-8">
     <div class="max-w-2xl mx-auto px-4">
+      <!-- <span class="text-center"
+        >Go back
+        <router-link to="/voyages"> home </router-link>
+      </span> -->
+      <router-link to="/voyages">
+        <ArrowBack fillColor="accent100" />
+      </router-link>
       <!-- Header -->
       <div class="text-center mb-8">
         <h1 class="text-3xl font-bold text-gray-900 mb-2">Report an Issue</h1>
@@ -8,29 +15,6 @@
           Found a bug or having trouble? Let us know so we can help!
         </p>
       </div>
-
-      <!-- Progress Steps (Optional)
-      <div class="flex items-center justify-center mb-10">
-        <div class="flex items-center">
-          <div
-            class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center"
-          >
-            1
-          </div>
-          <div class="w-20 h-1 bg-blue-600"></div>
-          <div
-            class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center"
-          >
-            2
-          </div>
-          <div class="w-20 h-1 bg-gray-300"></div>
-          <div
-            class="w-8 h-8 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center"
-          >
-            3
-          </div>
-        </div>
-      </div> -->
 
       <!-- Issue Form -->
       <div class="bg-white rounded-xl shadow-sm p-6 md:p-8">
@@ -87,41 +71,6 @@
             ></textarea>
           </div>
 
-          <!-- Upload Screenshot (Optional) -->
-          <!-- <div class="mb-8">
-            <label class="block text-sm font-medium text-gray-700 mb-2">
-              Add a screenshot (optional)
-            </label>
-            <div
-              @click="triggerFileInput"
-              class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-blue-400 transition-colors"
-            >
-              <div class="text-4xl text-gray-400 mb-2">📸</div>
-              <p class="text-gray-600 mb-2">Click to upload screenshot</p>
-              <p class="text-sm text-gray-500">PNG, JPG up to 5MB</p>
-              <input
-                type="file"
-                ref="fileInput"
-                @change="handleFileUpload"
-                accept="image/*"
-                class="hidden"
-              />
-            </div>
-            <div v-if="form.screenshot" class="mt-4 flex items-center">
-              <div class="flex items-center bg-gray-100 rounded-lg p-3">
-                <span class="text-gray-700 mr-3">📎</span>
-                <span class="text-sm">{{ form.screenshot.name }}</span>
-                <button
-                  type="button"
-                  @click="removeScreenshot"
-                  class="ml-4 text-gray-500 hover:text-red-500"
-                >
-                  ×
-                </button>
-              </div>
-            </div> -->
-          <!-- </div> -->
-
           <!-- Contact Info -->
           <div class="mb-8">
             <h3 class="text-lg font-medium text-gray-900 mb-4">
@@ -140,49 +89,8 @@
                   required
                 />
               </div>
-              <!-- <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">
-                  Phone Number (optional)
-                </label>
-                <input
-                  type="tel"
-                  v-model="form.phone"
-                  placeholder="+1 (555) 123-4567"
-                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-                />
-              </div> -->
             </div>
           </div>
-
-          <!-- Urgency -->
-          <!-- <div class="mb-8">
-            <label class="block text-sm font-medium text-gray-700 mb-3">
-              How urgent is this issue?
-            </label>
-            <div class="space-y-3">
-              <label
-                v-for="level in urgencyLevels"
-                :key="level.id"
-                class="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
-                :class="{
-                  'border-blue-500 bg-blue-50': form.urgency === level.id,
-                }"
-              >
-                <input
-                  type="radio"
-                  v-model="form.urgency"
-                  :value="level.id"
-                  class="h-4 w-4 text-blue-600 border-gray-300"
-                />
-                <div class="ml-3">
-                  <div class="font-medium text-gray-900">{{ level.label }}</div>
-                  <div class="text-sm text-gray-500">
-                    {{ level.description }}
-                  </div>
-                </div>
-              </label>
-            </div>
-          </div> -->
 
           <!-- Submit Button -->
           <div class="flex justify-end space-x-4">
@@ -196,7 +104,7 @@
             <button
               type="submit"
               :disabled="isSubmitting"
-              class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+              class="px-4 py-2 bg-accent100 text-white rounded-lg hover:bg-accent50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
             >
               <span v-if="isSubmitting" class="animate-spin mr-2">⟳</span>
               {{ isSubmitting ? "Submitting..." : "Submit Issue" }}
@@ -223,36 +131,12 @@
           ×
         </button>
       </div>
-
-      <!-- Help Links -->
-      <!-- <div class="mt-8 text-center">
-        <p class="text-gray-600 mb-4">Need immediate help?</p>
-        <div class="flex flex-col sm:flex-row justify-center gap-4">
-          <a
-            href="#"
-            class="text-blue-600 hover:text-blue-700 font-medium flex items-center justify-center"
-          >
-            📚 View Help Center
-          </a>
-          <a
-            href="#"
-            class="text-blue-600 hover:text-blue-700 font-medium flex items-center justify-center"
-          >
-            💬 Live Chat Support
-          </a>
-          <a
-            href="#"
-            class="text-blue-600 hover:text-blue-700 font-medium flex items-center justify-center"
-          >
-            📞 Call Support
-          </a>
-        </div>
-      </div> -->
     </div>
   </div>
 </template>
 
 <script setup>
+import ArrowBack from "@/assets/icons/ArrowBack.vue";
 import { ref } from "vue";
 
 // Form data
@@ -280,30 +164,6 @@ const issueTypes = ref([
   { id: "upload", label: "Upload Issue", icon: "📤" },
   { id: "account", label: "Account Issue", icon: "👤" },
   { id: "other", label: "Other", icon: "❓" },
-]);
-
-// Urgency levels
-const urgencyLevels = ref([
-  {
-    id: "low",
-    label: "Low Priority",
-    description: "Minor issue, no rush",
-  },
-  {
-    id: "medium",
-    label: "Medium Priority",
-    description: "Affecting normal use",
-  },
-  {
-    id: "high",
-    label: "High Priority",
-    description: "Cannot use the app",
-  },
-  {
-    id: "critical",
-    label: "Critical",
-    description: "Data loss or security issue",
-  },
 ]);
 
 // Methods

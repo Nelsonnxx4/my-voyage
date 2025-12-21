@@ -7,58 +7,35 @@
       'bg-transparent': !isScrolled && isTransparent,
     }"
   >
-    <div class="flex justify-between items-center">
+    <router-link to="/" class="flex justify-between items-center">
       <logo />
       <h4 class="text-textblack300 font-medium">Zende</h4>
-    </div>
+    </router-link>
 
     <!-- Desktop Nav -->
-    <nav class="hidden md:flex items-center gap-6 text-sm text-textblack300">
-      <a
-        href="#start"
-        class="hover:text-accent50 transition-colors"
-        :class="{ 'text-white': !isScrolled && isTransparent }"
-        >Start Here</a
-      >
-      <a
-        href="#benefits"
-        class="hover:text-accent50 transition-colors"
-        :class="{ 'text-white': !isScrolled && isTransparent }"
-        >Benefits</a
-      >
-      <a
-        href="#process"
-        class="hover:text-accent50 transition-colors"
-        :class="{ 'text-white': !isScrolled && isTransparent }"
-        >Process</a
-      >
-      <a
-        href="#compare"
-        class="hover:text-accent50 transition-colors"
-        :class="{ 'text-white': !isScrolled && isTransparent }"
-        >Compare</a
-      >
+    <nav
+      class="hidden md:flex justify-between items-center text-sm text-textblack300"
+    >
+      <ul class="flex justify-between items-center gap-2">
+        <li>
+          <a
+            v-for="(item, index) in NavPaths"
+            :key="index"
+            :href="item.href"
+            class="text-accent100 hover:text-accent50 font-medium transition-colors duration-200 md:mr-2 lg:mr-3"
+            @click.prevent="scrollToSection(item.href)"
+          >
+            {{ item.name }}
+          </a>
+        </li>
+      </ul>
+
       <router-link
-        to="/pricing"
-        class="hover:text-accent50 transition-colors"
-        :class="{ 'text-white': !isScrolled && isTransparent }"
-        >Pricing</router-link
+        to="/signup"
+        class="flex justify-between items-center px-4 py-2 rounded-full bg-black text-white shadow hover:bg-gray-800"
       >
-      <a
-        href="#faqs"
-        class="hover:text-accent50 transition-colors"
-        :class="{ 'text-white': !isScrolled && isTransparent }"
-        >FAQs</a
-      >
-      <router-link
-        to="/pricing"
-        class="ml-2 px-4 py-2 rounded-full transition-all duration-300"
-        :class="{
-          'bg-black text-white hover:bg-gray-800': isScrolled,
-          'bg-white text-black hover:bg-gray-100': !isScrolled && isTransparent,
-        }"
-      >
-        View Plans
+        <span> Get Started </span>
+        <ArrowOut />
       </router-link>
     </nav>
 
@@ -79,7 +56,10 @@
 defineOptions({ name: "AppHeader" });
 import Logo from "@/assets/icons/Logo.vue";
 import Menu from "@/assets/icons/Menu.vue";
+import ArrowOut from "@/assets/icons/ArrowOut.vue";
+
 import SideSlider from "@/components/SideSlider.vue";
+import { NavPaths } from "@/constants/constant";
 import { ref, onMounted, onUnmounted } from "vue";
 
 const headerRef = ref(null);
@@ -107,6 +87,21 @@ const openMenu = () => {
 
 const closeMenu = () => {
   isMenuOpen.value = false;
+};
+const scrollToSection = (href: string) => {
+  // Close mobile menu if open
+  isMenuOpen.value = false;
+
+  // Remove # from href to get the section id
+  const sectionId = href.replace("#", "");
+  const section = document.getElementById(sectionId);
+
+  if (section) {
+    section.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }
 };
 </script>
 

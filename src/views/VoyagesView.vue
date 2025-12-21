@@ -180,14 +180,20 @@
         v-if="isMenuOpen"
         class="fixed right-10 bottom-16 w-48 bg-white dark:bg-dark-background100 rounded-lg shadow-xl py-1 z-50"
       >
-        <!-- Favorites Option -->
+        <!-- Favorites Option
         <div
           @click="navigateToFavorites"
           class="px-4 py-2 hover:bg-gray-100 dark:hover:bg-dark-background200 cursor-pointer flex items-center border-b"
         >
           <HeartIcon class="mr-2" size="22" fillColor="#005b52" />
           <span class="text-textblack100">Favorites</span>
-        </div>
+        </div> -->
+        <!-- issues -->
+        <router-link to="/issues">
+          <span class="text-accent100"> ? </span>
+
+          <span>Issues/questions </span>
+        </router-link>
 
         <!-- Create Voyage Option -->
         <div
