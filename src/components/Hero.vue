@@ -2,7 +2,7 @@
   <main class="mt-20 py-6">
     <!-- Hero -->
     <section
-      class="max-w-6xl mx-auto md:my-10 px-4 sm:px-6 lg:px-8 text-center"
+      class="max-w-3xl xl:max-w-4xl mx-auto md:my-10 xl:pt-16 px-4 sm:px-6 lg:px-8 text-center"
     >
       <h1
         class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-gray-900 leading-tight"
@@ -35,10 +35,10 @@
 
     <!-- social media proof -->
 
-    <section class="flex justify-center items-center">
+    <section class="flex flex-col justify-center items-center">
       <span class="font-medium">Supported by </span>
 
-      <div>
+      <div class="flex justify-between items-center gap-3 md:gap-5 my-3">
         <FacebookIcon />
         <WhatsAppIcon />
         <XIcon />
@@ -61,7 +61,7 @@
     <!-- How it works -->
     <section
       id="howItWorks"
-      class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-20"
+      class="max-w-3xl xl:max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mt-20"
     >
       <h2
         class="text-xl pb-8 md:text-2xl font-semibold text-gray-900 text-center"
@@ -188,7 +188,7 @@
     <!-- Benefits -->
     <section
       id="benefits"
-      class="w-full md:max-w-xl mx-auto px-4 sm:px-6 lg:px-8 my-16 text-center"
+      class="flex flex-col justify-center items-center w-full md:max-w-xl xl:max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 my-16 text-center"
     >
       <span class="text-xs uppercase tracking-wide text-gray-500"
         >Branding</span
@@ -222,7 +222,7 @@
         </button>
       </div>
 
-      <div class="mt-10 text-left bg-white rounded-2xl p-6 shadow">
+      <div class="mt-10 text-left xl:w-[80%] bg-white rounded-2xl p-6 shadow">
         <h3 class="text-xl font-semibold">Photos That Feel Like You</h3>
         <ul class="mt-3 space-y-2 text-gray-600 text-base list-disc">
           <li>Add to your socials</li>
@@ -237,7 +237,7 @@
 
     <section
       id="pricing"
-      class="flex flex-col justify-center items-center gap-2 my-28 px-4"
+      class="flex flex-col lg:flex-row justify-center items-center gap-2 my-28 px-4"
     >
       <PricingCards />
     </section>

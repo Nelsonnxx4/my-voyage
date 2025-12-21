@@ -189,8 +189,11 @@
           <span class="text-textblack100">Favorites</span>
         </div> -->
         <!-- issues -->
-        <router-link to="/issues">
-          <span class="text-accent100"> ? </span>
+        <router-link
+          to="/issues"
+          class="cursor-pointer flex items-center hover:bg-gray-100"
+        >
+          <span class="px-4 py-3 text-lg text-accent200 font-bold"> ? </span>
 
           <span>Issues/questions </span>
         </router-link>
@@ -201,7 +204,7 @@
           class="px-4 py-3 hover:bg-gray-100 dark:hover:bg-dark-background200 cursor-pointer flex items-center"
         >
           <AddIcon class="mr-2" size="22" fillColor="#005b52" />
-          <span class="text-textblack100">Create Voyage</span>
+          <span class="">Create Voyage</span>
         </div>
       </div>
     </transition>

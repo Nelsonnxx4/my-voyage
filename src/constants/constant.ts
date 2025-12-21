@@ -14,7 +14,6 @@ interface NavItem {
 export const NavPaths = computed<NavItem[]>(() => [
   { name: "How it works", href: "howItWorks" },
   { name: "Benefits", href: "benefits" },
-  { name: "About", href: "about" },
   { name: "Pricing", href: "pricing" },
   { name: "FAQs", href: "faqs" },
 ]);

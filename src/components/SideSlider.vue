@@ -17,7 +17,11 @@
         <h4 class="font-semibold text-textblack200 dark:text-dark-textblack200">
           <!-- Menu -->
         </h4>
-        <CloseIcon @click="close" fillColor="textblack300" />
+        <CloseIcon
+          @click="close"
+          fillColor="textblack300"
+          class="cursor-pointer"
+        />
       </div>
 
       <nav class="flex-1 overflow-y-auto p-4">
@@ -38,8 +42,18 @@
           </li>
         </ul>
         <router-link
-          to="/signup"
-          class="flex justify-between items-center px-5 py-3 rounded-full bg-black text-white shadow hover:bg-gray-800"
+          v-if="!user"
+          to="/login"
+          class="flex justify-between items-center gap-2 md:ml-4 px-4 py-2 rounded-full bg-black text-white shadow hover:bg-gray-800"
+        >
+          <span> Get Started </span>
+          <ArrowOut />
+        </router-link>
+
+        <router-link
+          v-else
+          to="/voyages"
+          class="flex justify-between items-center gap-2 md:ml-4 px-4 py-2 rounded-full bg-black text-white shadow hover:bg-gray-800"
         >
           <span> Get Started </span>
           <ArrowOut />
@@ -53,6 +67,7 @@
 import CloseIcon from "@/assets/icons/CloseIcon.vue";
 import ArrowOut from "@/assets/icons/ArrowOut.vue";
 import { NavPaths } from "@/constants/constant";
+import { useAuth } from "@/composables/useAuth";
 import { useRoute } from "vue-router";
 
 interface NavItem {
@@ -60,6 +75,8 @@ interface NavItem {
   path: string;
   icon?: string;
 }
+
+const { user } = useAuth();
 
 defineProps<{
   isOpen: boolean;

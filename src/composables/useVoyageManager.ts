@@ -395,7 +395,6 @@ export const useVoyageManager = (): VoyageManager => {
     isMenuOpen,
     isProfileModal,
     isSmallModalOpen,
-    // voyageId,
     favoriteVoyages,
     size,
     formData,

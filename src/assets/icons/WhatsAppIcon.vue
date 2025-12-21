@@ -1,5 +1,10 @@
 <template>
-  <svg xmlns="http://www.w3.org/2000/svg" :width="size" :height="size">
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="2.98em"
+    height="3em"
+    viewBox="0 0 256 258"
+  >
     <defs>
       <linearGradient id="a" x1="50%" x2="50%" y1="100%" y2="0%">
         <stop offset="0%" stop-color="#1faf38" />
