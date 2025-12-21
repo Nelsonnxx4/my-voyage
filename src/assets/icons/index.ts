@@ -25,3 +25,7 @@ export { default as HeartIcon } from "@/assets/icons/HeartIcon.vue";
 export { default as Menu } from "@/assets/icons/Menu.vue";
 export { default as Info } from "@/assets/icons/InfoIcon.vue";
 export { default as Logo } from "@/assets/icons/Logo.vue";
+export { default as XIcon } from "@/assets/icons/XIcon.vue";
+export { default as FacebookIcon } from "@/assets/icons/FacebookIcon.vue";
+export { default as WhatsAppIcon } from "@/assets/icons/WhatsAppIcon.vue";
+export { default as LinkedInIcon } from "@/assets/icons/LinkedInIcon.vue";

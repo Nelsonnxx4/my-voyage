@@ -1,7 +1,7 @@
 <template>
   <header
     ref="headerRef"
-    class="flex justify-between items-center shadow-sm bg-white py-3 px-1 fixed top-0 left-0 right-0 z-50 transition-all duration-300 mb-10"
+    class="flex justify-between items-center shadow-sm bg-white py-3 px-1 md:px-2 fixed top-0 left-0 right-0 z-50 transition-all duration-300 mb-10"
     :class="{
       'bg-white/90 backdrop-blur-sm shadow-md': isScrolled,
       'bg-transparent': !isScrolled && isTransparent,
@@ -22,7 +22,7 @@
             v-for="(item, index) in NavPaths"
             :key="index"
             :href="item.href"
-            class="text-accent100 hover:text-accent50 font-medium transition-colors duration-200 md:mr-2 lg:mr-3"
+            class="text-[16px] text-accent100 hover:text-accent50 font-medium transition-colors duration-200 md:mr-2 lg:mr-3"
             @click.prevent="scrollToSection(item.href)"
           >
             {{ item.name }}
@@ -32,7 +32,7 @@
 
       <router-link
         to="/signup"
-        class="flex justify-between items-center px-4 py-2 rounded-full bg-black text-white shadow hover:bg-gray-800"
+        class="flex justify-between items-center gap-2 md:ml-4 px-4 py-2 rounded-full bg-black text-white shadow hover:bg-gray-800"
       >
         <span> Get Started </span>
         <ArrowOut />

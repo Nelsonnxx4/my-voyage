@@ -33,6 +33,19 @@
       </div>
     </section>
 
+    <!-- social media proof -->
+
+    <section class="flex justify-center items-center">
+      <span class="font-medium">Supported by </span>
+
+      <div>
+        <FacebookIcon />
+        <WhatsAppIcon />
+        <XIcon />
+        <LinkedInIcon />
+      </div>
+    </section>
+
     <!-- Logo row -->
     <!-- <div
         class="mt-12 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6 items-center text-gray-400"
@@ -50,11 +63,13 @@
       id="howItWorks"
       class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-20"
     >
-      <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 text-center">
+      <h2
+        class="text-xl pb-8 md:text-2xl font-semibold text-gray-900 text-center"
+      >
         How it works
       </h2>
       <div class="my-8">
-        <picture class="flex flex-col justify-center items-center">
+        <picture class="flex flex-col justify-center items-center md:hidden">
           <img
             src="@/assets/images/Zende_Emty_mobile.png"
             alt="empty state diagram"
@@ -90,8 +105,45 @@
           />
         </picture>
 
+        <!-- desktop -->
+
+        <picture class="md:flex flex-col justify-center items-center hidden">
+          <img
+            src="@/assets/images/Zende_Empty_desktop.png"
+            alt="Empty state"
+          />
+
+          <!-- arrow down -->
+          <img
+            src="@/assets/images/arrow-down-right.png"
+            alt="arrow down"
+            class="-mt-6 w-[50%]"
+          />
+
+          <!-- Create -->
+          <img
+            src="@/assets/images/Zende_create_desktop.png"
+            alt="Create voyage page"
+            class="w-full rotate-6"
+          />
+
+          <!-- arrow down -->
+          <img
+            src="@/assets/images/arrow-down-right.png"
+            alt="arrow down"
+            class="-mt-6 w-[50%] rotate-12"
+          />
+
+          <!--  voyage view -->
+          <img
+            src="@/assets/images/Zende_voyage_view_desktop.png"
+            alt="create"
+            class="w-[90%] -rotate-6"
+          />
+        </picture>
+
         <div
-          class="mt-20 grid grid-cols-1 md:grid-cols-3 gap-6 leading-6 text-base"
+          class="mt-20 md:mt-28 grid grid-cols-1 md:grid-cols-3 gap-6 leading-6 text-base"
         >
           <div
             class="bg-white rounded-xl p-6 shadow text-center border border-dashed border-slate-500 -rotate-3"
@@ -136,21 +188,26 @@
     <!-- Benefits -->
     <section
       id="benefits"
-      class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-16 text-center"
+      class="w-full md:max-w-xl mx-auto px-4 sm:px-6 lg:px-8 my-16 text-center"
     >
       <span class="text-xs uppercase tracking-wide text-gray-500"
         >Branding</span
       >
-      <h3 class="text-xl sm:text-3xl font-bold text-gray-900 mt-2 leading-6">
+      <h3
+        class="text-xl md:text-2xl font-semibold text-gray-900 mt-2 leading-6"
+      >
         Customize the full experience
       </h3>
       <p class="text-gray-600 max-w-2xl mx-auto mt-2">
-        From voyage pages to PDFs, your adventures always look like you.
+        From voyage pages to PDFs, your adventures always look like you. Plus
+        you get share your Journey on
+        <span
+          class="bg-gradient-to-br from-accent100 to-accent30 text-transparent bg-clip-text text-lg italic"
+        >
+          Social Media
+        </span>
       </p>
       <div class="mt-5 flex flex-wrap gap-2 justify-center">
-        <button class="px-3 py-1 rounded-full bg-gray-100 text-gray-700">
-          Social Media
-        </button>
         <button class="px-3 py-1 rounded-full bg-gray-100 text-gray-700">
           Memories
         </button>
@@ -178,7 +235,10 @@
 
     <!-- Pricing -->
 
-    <section id="pricing">
+    <section
+      id="pricing"
+      class="flex flex-col justify-center items-center gap-2 my-28 px-4"
+    >
       <PricingCards />
     </section>
 
@@ -187,7 +247,7 @@
       id="issues"
       class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-20 text-center"
     >
-      <h3 class="text-xl sm:text-3xl font-bold text-gray-900">
+      <h3 class="text-xl md:text-2xl font-semibold text-gray-900">
         Rating/Questions
       </h3>
 
@@ -238,7 +298,7 @@
       >
     </section> -->
 
-    <section id="faqs">
+    <section id="faqs" class="px-2">
       <FAQs />
     </section>
   </main>
@@ -246,4 +306,11 @@
 
 <script setup lang="ts">
 import FAQs from "@/components/FAQs.vue";
+import PricingCards from "@/components/PricingCards.vue";
+
+// icons
+import FacebookIcon from "@/assets/icons/FacebookIcon.vue";
+import WhatsAppIcon from "@/assets/icons/WhatsAppIcon.vue";
+import XIcon from "@/assets/icons/XIcon.vue";
+import LinkedInIcon from "@/assets/icons/LinkedInIcon.vue";
 </script>

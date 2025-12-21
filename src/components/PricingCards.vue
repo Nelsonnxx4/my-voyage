@@ -4,7 +4,7 @@
   <div
     v-for="plan in plans"
     :key="plan.id"
-    class="relative bg-white border-2 rounded-2xl shadow-sm divide-y divide-gray-200 transition-all duration-300 hover:shadow-lg"
+    class="w-full md:w-[60%] relative bg-white border-2 rounded-2xl shadow-sm divide-y divide-gray-200 transition-all duration-300 hover:shadow-lg"
     :class="getPlanBorderClass(plan)"
   >
     <!-- Current Plan Badge -->

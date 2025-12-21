@@ -1,6 +1,6 @@
 <template>
   <div class="w-full max-w-3xl mx-auto mt-16 mb-10 text-center">
-    <h2 class="text-xl font-bold text-gray-900 mb-2">
+    <h2 class="text-xl md:text-2xl font-semibold text-gray-900 mb-2">
       Frequently Asked Questions
     </h2>
     <p class="text-gray-600 mb-8">
@@ -18,7 +18,7 @@
           @click="toggleFaq(index)"
           class="w-full p-6 text-left flex justify-between items-center bg-white hover:bg-gray-50 transition-colors"
         >
-          <h3 class="text-lg font-semibold text-gray-900">
+          <h3 class="text-lg font-medium md:font-semibold text-gray-900">
             {{ faq.question }}
           </h3>
           <span class="text-gray-500 ml-4">

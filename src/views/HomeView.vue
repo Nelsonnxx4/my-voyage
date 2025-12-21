@@ -1,6 +1,6 @@
 <template>
   <Header />
-  <main class="px-1">
+  <main>
     <Hero />
   </main>
   <Footer />

@@ -1,5 +1,4 @@
 import { computed } from "vue";
-// import type { VoyageTypeInfo } from "@/types/voyage";
 import type { Platform } from "@/types/social";
 import facebook from "@/assets/images/facebook.svg";
 import x from "@/assets/images/x.svg";
@@ -13,11 +12,11 @@ interface NavItem {
 }
 
 export const NavPaths = computed<NavItem[]>(() => [
-  { name: "How it works", href: "#howItWorks" },
-  { name: "Benefits", href: "#benefits" },
-  { name: "About", href: "#about" },
-  { name: "Pricing", href: "#pricing" },
-  { name: "FAQs", href: "#faqs" },
+  { name: "How it works", href: "howItWorks" },
+  { name: "Benefits", href: "benefits" },
+  { name: "About", href: "about" },
+  { name: "Pricing", href: "pricing" },
+  { name: "FAQs", href: "faqs" },
 ]);
 
 export const platforms: Platform[] = [
