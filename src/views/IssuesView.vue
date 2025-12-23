@@ -1,13 +1,10 @@
 <template>
   <div class="min-h-screen bg-gray-50 py-8">
     <div class="max-w-2xl mx-auto px-4">
-      <!-- <span class="text-center"
-        >Go back
-        <router-link to="/voyages"> home </router-link>
-      </span> -->
       <router-link to="/voyages">
         <ArrowBack fillColor="accent100" />
       </router-link>
+
       <!-- Header -->
       <div class="text-center mb-8">
         <h1 class="text-3xl font-bold text-gray-900 mb-2">Report an Issue</h1>
@@ -52,7 +49,7 @@
               type="text"
               v-model="form.title"
               placeholder="e.g., Photos not uploading"
-              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-accent50 focus:border-accent50 outline-none transition"
               required
             />
           </div>
@@ -66,7 +63,7 @@
               v-model="form.description"
               rows="5"
               placeholder="Tell us what happened, steps to reproduce, and what you expected to happen..."
-              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition resize-none"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-accent50 focus:border-accent50 outline-none transition resize-none"
               required
             ></textarea>
           </div>
@@ -85,7 +82,7 @@
                   type="email"
                   v-model="form.email"
                   placeholder="you@example.com"
-                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-accent50 focus:border-accent50 outline-none transition"
                   required
                 />
               </div>
@@ -107,7 +104,7 @@
               class="px-4 py-2 bg-accent100 text-white rounded-lg hover:bg-accent50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
             >
               <span v-if="isSubmitting" class="animate-spin mr-2">⟳</span>
-              {{ isSubmitting ? "Submitting..." : "Submit Issue" }}
+              {{ isSubmitting ? "Sending..." : "Submit Issue" }}
             </button>
           </div>
         </form>
@@ -131,6 +128,23 @@
           ×
         </button>
       </div>
+
+      <!-- Error Message -->
+      <div
+        v-if="showError"
+        class="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center"
+      >
+        <div class="text-red-600 mr-3">❌</div>
+        <div>
+          <p class="font-medium text-red-800">Failed to submit issue</p>
+          <p class="text-red-700 text-sm">
+            {{ errorMessage }}
+          </p>
+        </div>
+        <button @click="showError = false" class="ml-auto text-red-600">
+          ×
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -139,24 +153,21 @@
 import ArrowBack from "@/assets/icons/ArrowBack.vue";
 import { ref } from "vue";
 
-// Form data
+const YOUR_EMAIL = "oonelsoncodes@gmail.com";
+
 const form = ref({
   type: "",
   title: "",
   description: "",
-  screenshot: null,
   email: "",
-  phone: "",
-  urgency: "medium",
 });
 
-// UI state
 const isSubmitting = ref(false);
 const showSuccess = ref(false);
+const showError = ref(false);
+const errorMessage = ref("");
 const selectedType = ref("");
-const fileInput = ref(null);
 
-// Issue types
 const issueTypes = ref([
   { id: "bug", label: "Bug Report", icon: "🐛" },
   { id: "feature", label: "Feature Request", icon: "✨" },
@@ -166,35 +177,14 @@ const issueTypes = ref([
   { id: "other", label: "Other", icon: "❓" },
 ]);
 
-// Methods
 const selectIssueType = (type) => {
   selectedType.value = type;
   form.value.type = type;
 };
 
-const triggerFileInput = () => {
-  fileInput.value.click();
-};
-
-const handleFileUpload = (event) => {
-  const file = event.target.files[0];
-  if (file && file.size <= 5 * 1024 * 1024) {
-    // 5MB limit
-    form.value.screenshot = file;
-  } else {
-    alert("File must be less than 5MB");
-  }
-};
-
-const removeScreenshot = () => {
-  form.value.screenshot = null;
-  fileInput.value.value = "";
-};
-
 const cancel = () => {
   if (confirm("Are you sure? Your changes will be lost.")) {
     resetForm();
-    // Navigate back or to dashboard
   }
 };
 
@@ -203,38 +193,53 @@ const resetForm = () => {
     type: "",
     title: "",
     description: "",
-    screenshot: null,
     email: "",
-    phone: "",
-    urgency: "medium",
   };
   selectedType.value = "";
   showSuccess.value = false;
+  showError.value = false;
 };
 
 const submitIssue = async () => {
   isSubmitting.value = true;
+  showError.value = false;
 
   try {
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    const issueTypeLabel =
+      issueTypes.value.find((t) => t.id === form.value.type)?.label ||
+      "Issue Report";
 
-    // In real app: Send to backend
-    // const response = await fetch('/api/issues', {
-    //   method: 'POST',
-    //   body: JSON.stringify(form.value)
-    // })
+    const subject = `[${issueTypeLabel}] ${form.value.title}`;
+    const body = `
+  Issue Type: ${issueTypeLabel}
+  Reported By: ${form.value.email}
+  Title: ${form.value.title}
+  
+  Description:
+  ${form.value.description}
+  
+  Submitted on: ${new Date().toLocaleString()}
+      `.trim();
 
-    console.log("Issue submitted:", form.value);
+    // Send email using mailto link
+    const mailtoLink = `mailto:${YOUR_EMAIL}?subject=${encodeURIComponent(
+      subject
+    )}&body=${encodeURIComponent(body)}`;
+
+    // Open default email client
+    window.location.href = mailtoLink;
+
+    // Show success message
+    console.log("Email prepared:", { subject, body });
     showSuccess.value = true;
-    resetForm();
 
-    // Auto-hide success message
+    // Reset form after a delay
     setTimeout(() => {
-      showSuccess.value = false;
-    }, 5000);
+      resetForm();
+    }, 3000);
   } catch (error) {
-    alert("Failed to submit issue. Please try again.");
+    errorMessage.value = "Failed to prepare email. Please try again.";
+    showError.value = true;
     console.error("Submission error:", error);
   } finally {
     isSubmitting.value = false;
@@ -249,11 +254,23 @@ input[type="radio"]:checked {
   border-color: #3b82f6;
 }
 
-/* Smooth transitions */
 button,
 input,
 textarea,
 label {
   transition: all 0.2s ease;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
 }
 </style>

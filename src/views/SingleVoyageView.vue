@@ -203,7 +203,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watch } from "vue";
+import { onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 
 import UserModal from "@/components/UserModal.vue";
@@ -252,42 +252,34 @@ const route = useRoute();
 
 const isShareModalOpen = ref<boolean>(false);
 
-const props = defineProps<{
-  id?: string;
-}>();
-
 const openShareModal = () => {
   isShareModalOpen.value = true;
 };
 
 const loadVoyageData = async () => {
-  const id = props.id || route.params.id?.toString();
+  const id = route.params.id as string;
 
-  if (!id) {
-    console.warn("No voyage ID provided");
-    return;
-  }
+  if (!id) return;
+
+  isDetailLoading.value = true;
+  detailError.value = null;
 
   try {
-    await handleFetchSingleVoyage(id);
+    const foundVoyage = await handleFetchSingleVoyage(id);
+
+    if (!foundVoyage) {
+      detailError.value = "Voyage not found";
+      return;
+    }
+
+    voyage.value = foundVoyage;
   } catch (error) {
-    console.error("Error loading voyage:", error);
+    error.value = detailError.value;
+    detailError.value = "Failed to load voyage";
+  } finally {
+    isDetailLoading.value = false;
   }
 };
 
-// Load data on mount
-onMounted(() => {
-  loadVoyageData();
-});
-
-// Watch for route changes
-watch(
-  () => route.params.id,
-  (newId, oldId) => {
-    // Only reload if the ID actually changed
-    if (newId && newId !== oldId) {
-      loadVoyageData();
-    }
-  }
-);
+onMounted(loadVoyageData);
 </script>

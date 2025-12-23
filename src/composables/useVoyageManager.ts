@@ -182,13 +182,13 @@ export const useVoyageManager = (): VoyageManager => {
   };
 
   const handleFetchSingleVoyage = async (
-    voyageId: string
+    id: string
   ): Promise<VoyageTypeInfo | null> => {
     isDetailLoading.value = true;
     detailError.value = null;
     voyage.value = null;
     try {
-      const foundVoyage = await fetchVoyageById(voyageId);
+      const foundVoyage = await fetchVoyageById(id);
 
       if (!foundVoyage) {
         detailError.value = "Voyage not found";

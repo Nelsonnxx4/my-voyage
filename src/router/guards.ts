@@ -21,9 +21,22 @@ export function setupRouter(routes: AppRouteRecordRaw[]) {
     }
 
     if (to.meta.requiresPremium && user.value) {
-      const { checkStatus } = usePremium(user.value.id);
-      const isStillPremium: boolean = await checkStatus();
-      if (isStillPremium === false) return "/pricing";
+      try {
+        const { checkStatus } = usePremium(user.value.id);
+
+        await checkStatus();
+
+        const { isPremium } = usePremium(user.value.id);
+
+        if (!isPremium) {
+          return {
+            path: "/pricing",
+            query: { redirect: to.fullPath },
+          };
+        }
+      } catch (error) {
+        console.error("Error checking premium status:", error);
+      }
     }
 
     if ((to.path === "/login" || to.path === "/signup") && isAuthenticated) {

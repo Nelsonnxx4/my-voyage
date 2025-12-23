@@ -69,6 +69,7 @@ export const fetchVoyageById = async (
       },
       params: {
         id: `eq.${id}`,
+        user_id: `eq.${session.user.id}`,
         select: "*",
       },
     });
