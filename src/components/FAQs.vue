@@ -40,9 +40,9 @@
 import { faqs } from "@/constants/constant";
 import { ref } from "vue";
 
-const openFaq = ref(null);
+const openFaq = ref<number | null>(null);
 
-const toggleFaq = (index) => {
+const toggleFaq = (index: number | null) => {
   openFaq.value = openFaq.value === index ? null : index;
 };
 </script>

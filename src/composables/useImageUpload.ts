@@ -258,7 +258,7 @@ export const useImageUpload = (formData: Ref<FormDataType>): ImageActions => {
           const response = await fetch(tempImage.base64);
           const blob = await response.blob();
 
-          const { data, error } = await supabase.storage
+          const { error } = await supabase.storage
             .from("voyage-images")
             .upload(filePath, blob, {
               cacheControl: "3600",

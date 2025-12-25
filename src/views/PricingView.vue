@@ -119,8 +119,13 @@ const loadPlans = async () => {
       await checkStatus();
       isPremiumUser.value = user.value.is_premium || false;
     }
-  } catch (err: any) {
-    errorPlans.value = err.message || "Failed to load plans";
+  } catch (err: unknown) {
+    if (err && typeof err === "object" && "message" in err) {
+      errorPlans.value =
+        (err as { message: string }).message || "Failed to load plans";
+    } else {
+      errorPlans.value = "Failed to load plans";
+    }
     console.error("Error loading plans:", err);
   } finally {
     loadingPlans.value = false;

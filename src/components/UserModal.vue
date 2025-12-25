@@ -409,7 +409,7 @@
     <DeleteAccountModal
       :isOpen="showDeleteAccountModal"
       @close="closeDeleteAccountModal"
-      @confirm="confirmDeleteAccount(userData?.id)"
+      @confirm="confirmDeleteAccount(user?.id)"
     />
   </main>
 </template>
@@ -431,7 +431,7 @@ import { tabs } from "@/constants/userConstant";
 import DeleteAccountModal from "./DeleteAccountModal.vue";
 import EditIcon from "@/assets/icons/EditIcon.vue";
 
-const { handleLogout } = useAuth();
+const { handleLogout, user } = useAuth();
 
 const {
   activeTab,

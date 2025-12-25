@@ -49,10 +49,11 @@
 <script setup lang="ts">
 import DangerIcon from "@/assets/icons/DangerIcon.vue";
 import { deleteUserAccount } from "@/services/supabase/auth";
-import { useUserProfile } from "@/composables/useUserProfile";
+import { useAuth } from "@/composables/useAuth";
 import { ref, onMounted, onBeforeUnmount } from "vue";
 
-const { userData } = useUserProfile();
+const { user } = useAuth();
+
 const props = defineProps({
   isOpen: {
     type: Boolean,
@@ -68,13 +69,7 @@ const close = () => {
 
 const confirmDeleteAccount = () => {
   emit("delete");
-  const userId = userData.value.id;
-  deleteUserAccount(userId);
-  // Retrieve userId from your auth/session logic here
-  // For example, if you have a currentUser object:
-  // const userId = currentUser?.id;
-  // deleteUserAccount(userId);
-  // If you don't have userId available, update this logic accordingly.
+  deleteUserAccount(user.value?.id);
 };
 
 // Handle escape key press

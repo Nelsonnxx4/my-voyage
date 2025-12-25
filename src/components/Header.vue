@@ -109,10 +109,11 @@ const openMenu = () => {
 const closeMenu = () => {
   isMenuOpen.value = false;
 };
-const scrollToSection = (href: string) => {
+const scrollToSection = (href: string | undefined) => {
   isMenuOpen.value = false;
 
-  const sectionId = href.replace("#", "");
+  const sectionId: string | undefined = href?.replace("#", "");
+  if (!sectionId) return;
   const section = document.getElementById(sectionId);
 
   if (section) {

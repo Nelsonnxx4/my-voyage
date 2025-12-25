@@ -60,7 +60,7 @@ export const signOut = async (): Promise<void> => {
 };
 
 export const deleteUserAccount = async (
-  userId: string
+  userId: string | undefined
 ): Promise<{ success: boolean; error?: string }> => {
   try {
     const { error: dataError } = await supabase

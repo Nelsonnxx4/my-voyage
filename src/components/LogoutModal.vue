@@ -47,7 +47,7 @@
 </template>
 
 <script setup lang="ts">
-import LogOutIcon from "@/assets/icons/LogOutIcon.vue";
+import LogOutIcon from "@/assets/icons/LogoutIcon.vue";
 import { ref, onMounted, onBeforeUnmount } from "vue";
 
 const props = defineProps({

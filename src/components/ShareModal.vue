@@ -146,7 +146,9 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits(["close"]);
 
-const { exportToPdf, canExportPdf } = usePdfExport();
+import { computed } from "vue";
+const { exportToPdf, canExport } = usePdfExport();
+const canExportPdf = computed(() => canExport());
 const { addToast } = useToast();
 
 const urlInput = ref<HTMLInputElement | null>(null);
@@ -176,8 +178,8 @@ const copyLink = async () => {
 };
 
 const handleDownloadPdf = async () => {
-  if (!canExportPdf) {
-    return; // Button is disabled, but just in case
+  if (!canExportPdf.value) {
+    return;
   }
 
   isExporting.value = true;

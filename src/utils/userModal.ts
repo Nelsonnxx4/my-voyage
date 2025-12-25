@@ -1,11 +1,9 @@
-// userModal.ts
 import { ref, watch } from "vue";
 import { useUserProfile } from "@/composables/useUserProfile";
 import { useTheme } from "@/composables/useTheme";
 import { deleteUserAccount } from "@/services/supabase/auth";
 
 export const useUserModal = () => {
-  // Initialize composables inside the function
   const {
     userData,
     handleUpdateUserProfile,
@@ -30,28 +28,23 @@ export const useUserModal = () => {
 
   const closeDeleteAccountModal = () => (showDeleteAccountModal.value = false);
 
-  // Edit state management
   const isEditingProfile = ref(false);
   const successMessage = ref("");
 
-  // Profile image drag and drop state
   const dragOver = ref<boolean>(false);
   const fileInput = ref<HTMLInputElement | null>(null);
   const isImgLoading = ref<boolean>(false);
 
-  // Edit form data
   const editForm = ref({
     name: "",
     email: "",
   });
 
-  // Form validation errors
   const editFormErrors = ref({
     name: "",
     email: "",
   });
 
-  // Initialize edit form with current user data
   const initializeEditForm = () => {
     if (userData.value) {
       editForm.value = {
@@ -258,7 +251,7 @@ export const useUserModal = () => {
     }
   };
 
-  const confirmDeleteAccount = (userId: string) => {
+  const confirmDeleteAccount = (userId: string | undefined) => {
     deleteUserAccount(userId);
   };
 

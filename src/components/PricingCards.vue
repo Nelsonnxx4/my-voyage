@@ -1,88 +1,96 @@
 <template>
-  <!-- Plans Grid -->
-
-  <div
-    v-for="plan in plans"
-    :key="plan.id"
-    class="w-[80%] md:w-[60%] xl:w-[20%] md:min-h-[560px] relative bg-white border-2 rounded-2xl shadow-sm divide-y divide-gray-200 transition-all duration-300 hover:shadow-lg"
-    :class="getPlanBorderClass(plan)"
-  >
-    <!-- Current Plan Badge -->
+  <div class="flex flex-wrap gap-8 justify-center">
     <div
-      v-if="isCurrentPlan(plan)"
-      class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-1 text-xs font-bold rounded-full uppercase tracking-wide shadow-md"
+      v-for="plan in plans"
+      :key="plan.id"
+      class="w-[80%] md:w-[60%] xl:w-[20%] md:min-h-[560px] relative bg-white border-2 rounded-2xl shadow-sm divide-y divide-gray-200 transition-all duration-300 hover:shadow-lg"
+      :class="getPlanBorderClass(plan)"
     >
-      Current Plan
-    </div>
-
-    <!-- Popular Badge -->
-    <div
-      v-else-if="plan.featured"
-      class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-accent100 text-white px-4 py-1 text-xs font-bold rounded-full uppercase tracking-wide shadow-md"
-    >
-      Popular
-    </div>
-
-    <!-- Plan Content -->
-    <div class="p-6">
-      <h2 class="text-2xl font-bold text-gray-900">{{ plan.name }}</h2>
-      <p class="mt-4 text-sm text-gray-500">{{ plan.description }}</p>
-
-      <!-- Price -->
-      <div class="mt-8">
-        <span class="text-5xl font-extrabold text-gray-900">
-          ${{ plan.prices[0].amount }}
-        </span>
-        <span class="text-base font-medium text-gray-500">
-          /{{ plan.prices[0].interval || "one-time" }}
-        </span>
-      </div>
-
-      <!-- Action Button -->
-      <button
-        v-if="shouldShowButton(plan)"
-        @click="handlePlanSelection(plan)"
-        :disabled="isLoadingPlan(plan) || isCurrentPlan(plan)"
-        :class="getButtonClass(plan)"
-        class="mt-8 block w-full py-3 px-6 border rounded-md text-center font-medium transition-all duration-200"
-      >
-        {{ getButtonText(plan) }}
-      </button>
-
-      <!-- No Button for Free Plan when user is Free -->
+      <!-- Current Plan Badge -->
       <div
-        v-else-if="plan.name === 'Free/Basic' && !isPremiumUser"
-        class="mt-8 block w-full py-3 px-6 text-center text-normal text-accent100 italic"
+        v-if="isCurrentPlan(plan)"
+        class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-1 text-xs font-bold rounded-full uppercase tracking-wide shadow-md"
       >
-        You're on this plan
+        Current Plan
       </div>
-    </div>
 
-    <!-- Features -->
-    <div class="pt-6 pb-8 px-6">
-      <h3 class="text-xs font-medium text-gray-900 tracking-wide uppercase">
-        What's included
-      </h3>
-      <ul class="mt-6 space-y-4">
-        <li
-          v-for="feature in plan.features"
-          :key="feature"
-          class="flex items-start"
+      <!-- Popular Badge -->
+      <div
+        v-else-if="plan.featured"
+        class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-accent100 text-white px-4 py-1 text-xs font-bold rounded-full uppercase tracking-wide shadow-md"
+      >
+        Popular
+      </div>
+
+      <!-- Plan Content -->
+      <div class="p-6">
+        <h2 class="text-2xl font-bold text-gray-900">{{ plan.name }}</h2>
+        <p class="mt-4 text-sm text-gray-500">{{ plan.description }}</p>
+
+        <!-- Price -->
+        <div class="mt-8">
+          <span class="text-5xl font-extrabold text-gray-900">
+            ${{
+              Array.isArray(plan.prices) && plan.prices[0]
+                ? plan.prices[0].amount
+                : ""
+            }}
+          </span>
+          <span class="text-base font-medium text-gray-500">
+            /{{
+              Array.isArray(plan.prices) && plan.prices[0]?.interval
+                ? plan.prices[0].interval
+                : "one-time"
+            }}
+          </span>
+        </div>
+
+        <!-- Action Button -->
+        <button
+          v-if="shouldShowButton(plan)"
+          @click="handlePlanSelection(plan)"
+          :disabled="isLoadingPlan(plan) || isCurrentPlan(plan)"
+          :class="getButtonClass(plan)"
+          class="mt-8 block w-full py-3 px-6 border rounded-md text-center font-medium transition-all duration-200"
         >
-          <svg
-            class="flex-shrink-0 h-5 w-5 text-green-500"
-            fill="currentColor"
-            viewBox="0 0 20 20"
+          {{ getButtonText(plan) }}
+        </button>
+
+        <!-- No Button for Free Plan when user is Free -->
+        <div
+          v-else-if="plan.name === 'Free/Basic' && !isPremiumUser"
+          class="mt-8 block w-full py-3 px-6 text-center text-normal text-accent100 italic"
+        >
+          You're on this plan
+        </div>
+      </div>
+
+      <!-- Features -->
+      <div class="pt-6 pb-8 px-6">
+        <h3 class="text-xs font-medium text-gray-900 tracking-wide uppercase">
+          What's included
+        </h3>
+        <ul class="mt-6 space-y-4">
+          <li
+            v-for="feature in plan.features"
+            :key="feature"
+            class="flex items-start"
           >
-            <path
-              fill-rule="evenodd"
-              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-              clip-rule="evenodd"
-            />
-          </svg>
-          <span class="ml-3 text-base text-gray-700">{{ feature }}</span>
-        </li>
-      </ul>
+            <svg
+              class="flex-shrink-0 h-5 w-5 text-green-500"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                clip-rule="evenodd"
+              />
+            </svg>
+            <span class="ml-3 text-base text-gray-700">{{ feature }}</span>
+          </li>
+        </ul>
+      </div>
     </div>
   </div>
 </template>
@@ -134,8 +142,12 @@ const loadPlans = async () => {
       await checkStatus();
       isPremiumUser.value = user.value.is_premium || false;
     }
-  } catch (err: any) {
-    errorPlans.value = err.message || "Failed to load plans";
+  } catch (err: unknown) {
+    if (err && typeof err === "object" && "message" in err) {
+      errorPlans.value = (err as { message: string }).message;
+    } else {
+      errorPlans.value = "Failed to load plans";
+    }
     console.error("Error loading plans:", err);
   } finally {
     loadingPlans.value = false;
@@ -232,7 +244,7 @@ const getPlanBorderClass = (plan: Plan): string => {
 };
 
 const handlePlanSelection = async (plan: Plan) => {
-  if (!plan.prices?.[0]?.id) {
+  if (!Array.isArray(plan.prices) || !plan.prices[0]?.id) {
     alert("No price available for this plan.");
     return;
   }
