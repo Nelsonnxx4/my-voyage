@@ -62,4 +62,13 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+
+  build: {
+    target: "es2020",
+    outDir: "dist",
+    emptyOutDir: true,
+  },
+  server: {
+    port: 3000,
+  },
 });

@@ -1,4 +1,3 @@
-// src/composables/usePremium.ts - Updated limits
 import { ref, computed } from "vue";
 import { supabase } from "@/config/supabase";
 import {
@@ -142,14 +141,5 @@ export const usePremium = (userId?: string): PremiumFeatures => {
     upgradeUser,
     manageBilling,
     loadUserPlan,
-  };
-};
-
-export const usePlanLimits = () => {
-  const premium = usePremium();
-  return {
-    limits: premium.limits,
-    isPremium: premium.isPremium,
-    loadUserPlan: premium.loadUserPlan,
   };
 };

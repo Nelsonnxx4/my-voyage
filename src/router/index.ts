@@ -62,7 +62,7 @@ const routes: AppRouteRecordRaw[] = [
     name: "SingleVoyage",
     component: () => import("@/views/SingleVoyageView.vue"),
     meta: { requiresAuth: true },
-    props: true,
+    props: false,
   },
   {
     path: "/voyages/:id/edit",

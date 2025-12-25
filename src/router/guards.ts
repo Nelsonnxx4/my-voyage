@@ -9,39 +9,38 @@ export function setupRouter(routes: AppRouteRecordRaw[]) {
     routes,
   });
 
-  router.beforeEach(async (to) => {
+  router.beforeEach(async (to, from) => {
     const { checkAuth, user } = useAuth();
     const isAuthenticated = await checkAuth();
 
     if (to.meta.requiresAuth && !isAuthenticated) {
-      return {
-        path: "/login",
-        query: { redirect: to.fullPath },
-      };
+      return { path: "/login", query: { redirect: to.fullPath } };
     }
 
     if (to.meta.requiresPremium && user.value) {
       try {
-        const { checkStatus } = usePremium(user.value.id);
-
+        const { checkStatus, isPremium } = usePremium(user.value.id);
         await checkStatus();
 
-        const { isPremium } = usePremium(user.value.id);
-
         if (!isPremium) {
-          return {
-            path: "/pricing",
-            query: { redirect: to.fullPath },
-          };
+          return { path: "/pricing", query: { redirect: to.fullPath } };
         }
       } catch (error) {
         console.error("Error checking premium status:", error);
       }
     }
 
-    if ((to.path === "/login" || to.path === "/signup") && isAuthenticated) {
-      return "/voyages";
+    // Guest-only routes check
+    if (to.meta.guestOnly && isAuthenticated) {
+      return { path: "/voyages" };
     }
+
+    // Redirect authenticated users away from login/signup
+    if ((to.path === "/login" || to.path === "/signup") && isAuthenticated) {
+      return { path: "/voyages" };
+    }
+
+    return true;
   });
 
   return router;
