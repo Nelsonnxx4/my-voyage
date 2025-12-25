@@ -55,9 +55,17 @@
         <div>
           <USkeleton class="h-4 w-20 base mb-1 bg-skeleton" />
           <div class="flex space-x-1">
-            <template v-for="n in 5" :key="n">
-              <USkeleton class="h-6 w-6 base rounded-full bg-skeleton" />
-            </template>
+            <USkeleton class="h-6 w-6 base rounded-full bg-skeleton" />
+
+            <USkeleton
+              class="h-6 w-6 base rounded-full bg-skeleton"
+            /><USkeleton
+              class="h-6 w-6 base rounded-full bg-skeleton"
+            /><USkeleton
+              class="h-6 w-6 base rounded-full bg-skeleton"
+            /><USkeleton
+              class="h-6 w-6 base rounded-full bg-skeleton"
+            /><USkeleton class="h-6 w-6 base rounded-full bg-skeleton" />
           </div>
         </div>
       </div>

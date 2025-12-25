@@ -63,6 +63,10 @@ export const deleteUserAccount = async (
   userId: string | undefined
 ): Promise<{ success: boolean; error?: string }> => {
   try {
+    if (!userId) {
+      throw new Error("User ID is undefined.");
+    }
+
     const { error: dataError } = await supabase
       .from("profiles")
       .delete()
@@ -89,14 +93,15 @@ export const deleteUserAccount = async (
   }
 };
 
-export const handleAuthCallback = async (): Promise<AuthUser> => {
+export const handleAuthCallback = async (): // email: string | undefined
+Promise<AuthUser> => {
   const {
     data: { user },
-    error,
+    // error,
   } = await supabase.auth.getUser();
 
-  if (error || !user) {
-    throw error || new Error("No user found");
+  if (!user) {
+    return null;
   }
 
   const avatarUrl = user.user_metadata?.avatar_url as string | null;

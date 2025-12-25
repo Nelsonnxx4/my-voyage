@@ -9,7 +9,7 @@ export function setupRouter(routes: AppRouteRecordRaw[]) {
     routes,
   });
 
-  router.beforeEach(async (to, from) => {
+  router.beforeEach(async (to) => {
     const { checkAuth, user } = useAuth();
     const isAuthenticated = await checkAuth();
 
@@ -30,12 +30,10 @@ export function setupRouter(routes: AppRouteRecordRaw[]) {
       }
     }
 
-    // Guest-only routes check
     if (to.meta.guestOnly && isAuthenticated) {
       return { path: "/voyages" };
     }
 
-    // Redirect authenticated users away from login/signup
     if ((to.path === "/login" || to.path === "/signup") && isAuthenticated) {
       return { path: "/voyages" };
     }

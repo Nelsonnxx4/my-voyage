@@ -270,7 +270,7 @@ export const useUserProfile = () => {
   };
 
   // Auth state change listener
-  supabase.auth.onAuthStateChange((event, session) => {
+  supabase.auth.onAuthStateChange((_, session) => {
     if (session?.user) {
       authUser.value = {
         id: session.user.id,

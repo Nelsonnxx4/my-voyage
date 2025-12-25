@@ -1,10 +1,8 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import { useVoyageManager } from "@/composables/useVoyageManager";
 
 export const genUtils = () => {
   const router = useRouter();
-  const { voyageId, error } = useVoyageManager();
   const isSubmitting = ref(false);
 
   const formatDateForInput = (date: Date | string) => {
@@ -24,7 +22,5 @@ export const genUtils = () => {
     goBack,
     upgradeToPremium,
     isSubmitting,
-    error,
-    voyageId,
   };
 };

@@ -4,9 +4,9 @@
       <EditVoyageSkeleton />
     </div>
     <div v-else-if="detailError">
-      <p class="text-red-600 mb-4">{{ error }}</p>
+      <p class="text-red-600 mb-4">{{ detailError }}</p>
       <button
-        @click="handleFetchSingleVoyage(voyageId)"
+        @click="handleFetchSingleVoyage(voyage?.id ?? '')"
         class="px-4 py-2 bg-accent50 text-white rounded"
       >
         Retry
@@ -16,7 +16,7 @@
       <div class="flex justify-between items-center mb-5">
         <h4 class="text-textblack100">Edit Voyage</h4>
         <CloseIcon
-          @click="navigateToVoyage(voyage.id)"
+          @click="navigateToVoyage(voyage?.id ?? '')"
           fillColor="textblack100"
           class="cursor-pointer"
         />
@@ -209,7 +209,7 @@
             placeholder="A weekend in Monaco"
           />
 
-          <div class="space-y-2">
+          <!-- <div class="space-y-2">
             <label class="block text-textblack100 font-medium">Location</label>
 
             <div class="flex gap-3">
@@ -252,7 +252,7 @@
             <MapView />
 
             <!-- Pin Controls -->
-            <div class="mt-3 p-3 bg-gray-50 rounded-lg border">
+          <!-- <div class="mt-3 p-3 bg-gray-50 rounded-lg border">
               <div class="flex items-center justify-between mb-2">
                 <span class="text-sm font-medium text-gray-700">
                   Pinned Locations ({{ pins.length }}/{{ maxPinnedLocations }})
@@ -288,7 +288,7 @@
             </div>
 
             <!-- Pinned List -->
-            <div v-if="pins.length" class="mt-2 border rounded p-2 bg-white">
+          <!-- <div v-if="pins.length" class="mt-2 border rounded p-2 bg-white">
               <div
                 v-for="(p, i) in pins"
                 :key="i"
@@ -302,16 +302,11 @@
                     {{ p.lat.toFixed(4) }}, {{ p.lon.toFixed(4) }}
                   </p>
                 </div>
-                <button
-                  type="button"
-                  class="text-red-600 hover:underline text-sm"
-                  @click="removePinAt(i)"
-                >
-                  Remove
-                </button>
+                
               </div>
             </div>
-          </div>
+          </div> -->
+          --> -->
 
           <!-- Date range -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
@@ -319,7 +314,7 @@
               <label class="block text-textblack100 font-medium mb-1"
                 >Date range</label
               >
-              <Calendar
+              <!-- <Calendar
                 v-model="dateRange"
                 selectionMode="range"
                 @update:modelValue="handleDateRangeChange"
@@ -331,7 +326,7 @@
                 dateFormat="yy-mm-dd"
                 :manualInput="false"
                 placeholder="Select trip dates"
-              />
+              /> -->
             </div>
           </div>
 
@@ -369,7 +364,7 @@
         <div class="flex justify-end space-x-3 pt-4">
           <button
             type="button"
-            @click="navigateToVoyage(voyageId)"
+            @click="navigateToVoyage(voyage?.id ?? '')"
             class="px-4 py-2 border rounded text-textblack100 hover:bg-gray-100"
           >
             Cancel
@@ -389,18 +384,18 @@
 
 <script setup lang="ts">
 // imports from vue
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 // imports from PrimeVue
 import Editor from "primevue/editor";
 import Rating from "primevue/rating";
-import Calendar from "primevue/calendar";
+// import Calendar from "primevue/calendar";
 // imports from ui components
 import EditVoyageSkeleton from "@/components/ui/EditVoyageSkeleton.vue";
 import ReusableButton from "@/components/ui/ReusableButton.vue";
 import ReusableInput from "@/components/ui/ReusableInput.vue";
 import Spinner from "@/components/ui/Spinner.vue";
-import MapView from "@/components/MapView.vue";
+// import MapView from "@/components/MapView.vue";
 // imports from icons
 import EditIcon from "@/assets/icons/EditIcon.vue";
 import CloseIcon from "@/assets/icons/CloseIcon.vue";
@@ -408,14 +403,14 @@ import TrashIcon from "@/assets/icons/TrashIcon.vue";
 import CropIcon from "@/assets/icons/CropIcon.vue";
 import RotateRight from "@/assets/icons/RotateRight.vue";
 import RotateLeft from "@/assets/icons/RotateLeft.vue";
-import LocationIcon from "@/assets/icons/LocationIcon.vue";
+// import LocationIcon from "@/assets/icons/LocationIcon.vue";
 // imports from composables/functions/types
 import { useVoyageManager } from "@/composables/useVoyageManager";
 import { useImageUpload } from "@/composables/useImageUpload";
-import { useMap } from "@/composables/useMap";
+// import { useMap } from "@/composables/useMap";
 import { usePremium } from "@/composables/usePremium";
 import { genUtils } from "@/utils/genUtils";
-import type { LocationSuggestion } from "@/types/mapTypes";
+// import type { LocationSuggestion } from "@/types/mapTypes";
 import type { FormDataType } from "@/types/formData";
 import { VoyageTypeInfo } from "@/types/voyage";
 import { showToast } from "@/utils/showToast";
@@ -423,7 +418,6 @@ import { showToast } from "@/utils/showToast";
 const route = useRoute();
 
 const {
-  voyageId,
   isDetailLoading,
   detailError,
   voyage,
@@ -433,8 +427,7 @@ const {
   handleUpdateVoyage,
 } = useVoyageManager();
 
-const { isSubmitting, formatDateForInput, error, upgradeToPremium } =
-  genUtils();
+const { isSubmitting, upgradeToPremium } = genUtils();
 
 const {
   rotate,
@@ -454,10 +447,10 @@ const {
   handles,
   imageStyle,
   cropBoxStyle,
-  cropBox,
+  // cropBox,
   croppedImage,
   dragOver,
-  fileInput,
+  // fileInput,
   isImgLoading,
   hasImage,
   showActionButtons,
@@ -473,19 +466,19 @@ const {
 
 const { loadUserPlan } = usePremium();
 
-const {
-  selectedLocation,
-  locationSearch,
-  locationSuggestions,
-  isSearching,
-  pins,
-  searchLocation,
-  selectSuggestion,
-  useCurrentLocation,
-  addPin,
-  removePinAt,
-  maxPinnedLocations,
-} = useMap();
+// const {
+//   selectedLocation,
+//   locationSearch,
+//   locationSuggestions,
+//   isSearching,
+//   pins,
+//   searchLocation,
+//   selectSuggestion,
+//   useCurrentLocation,
+//   addPin,
+//   removePinAt,
+//   maxPinnedLocations,
+// } = useMap();
 
 // Keep original for diffing
 const original = ref<VoyageTypeInfo | null>(null);
@@ -535,7 +528,7 @@ const load = async () => {
     const v = await handleFetchSingleVoyage(id);
 
     if (!v) {
-      error.value = "Failed to load voyage";
+      detailError.value = "Failed to load voyage";
       return;
     }
     const imageUrl = extractImageUrls(v);
@@ -565,20 +558,20 @@ const load = async () => {
       }
     }
 
-    // Set location if exists
-    if (v.location && v.latitude && v.longitude) {
-      selectedLocation.value = {
-        display_name: v.location,
-        lat: v.latitude,
-        lon: v.longitude,
-      };
-      locationSearch.value = v.location;
-    }
+    // // Set location if exists
+    // if (v.location && v.latitude && v.longitude) {
+    //   selectedLocation.value = {
+    //     display_name: v.location,
+    //     lat: v.latitude,
+    //     lon: v.longitude,
+    //   };
+    //   locationSearch.value = v.location;
+    // }
 
-    // Load existing pins
-    if (v.pins && Array.isArray(v.pins)) {
-      pins.value = [...v.pins];
-    }
+    // // Load existing pins
+    // if (v.pins && Array.isArray(v.pins)) {
+    //   pins.value = [...v.pins];
+    // }
 
     console.log(
       "Loaded voyage with",
@@ -588,7 +581,7 @@ const load = async () => {
     );
   } catch (err) {
     console.error("Error loading voyage:", err);
-    error.value = "Failed to load voyage. Please try again.";
+    detailError.value = "Failed to load voyage. Please try again.";
   }
 };
 
@@ -631,41 +624,41 @@ const buildUpdates = () => {
   if (formData.value.longitude !== (original.value.longitude ?? null))
     updates.longitude = formData.value.longitude;
 
-  // Compare pins
-  const origPins = original.value.pins ?? [];
-  if (JSON.stringify(pins.value) !== JSON.stringify(origPins))
-    updates.pins = pins.value;
+  // // Compare pins
+  // const origPins = original.value.pins ?? [];
+  // if (JSON.stringify(pins.value) !== JSON.stringify(origPins))
+  //   updates.pins = pins.value;
 
   return updates;
 };
 
-const reachedPinLimit = computed(
-  () => pins.value.length >= maxPinnedLocations.value
-);
+// const reachedPinLimit = computed(
+//   () => pins.value.length >= maxPinnedLocations.value
+// );
 
 // Auto-pin when selecting suggestion
-const selectAndPinSuggestion = (suggestion: LocationSuggestion) => {
-  selectSuggestion(suggestion);
+// const selectAndPinSuggestion = (suggestion: LocationSuggestion) => {
+//   selectSuggestion(suggestion);
 
-  // Auto-pin the selected location if not at limit
-  if (!reachedPinLimit.value) {
-    setTimeout(() => {
-      pinSelectedLocation();
-    }, 100);
-  }
-};
+//   // Auto-pin the selected location if not at limit
+//   if (!reachedPinLimit.value) {
+//     setTimeout(() => {
+//       pinSelectedLocation();
+//     }, 100);
+//   }
+// };
 
-const pinSelectedLocation = () => {
-  if (!selectedLocation.value) return;
+// const pinSelectedLocation = () => {
+//   if (!selectedLocation.value) return;
 
-  const success = addPin(selectedLocation.value);
-  if (!success && reachedPinLimit.value) {
-    showToast("Pin limit reached. Upgrade for more pins.", "warning");
-  }
-};
+//   const success = addPin(selectedLocation.value);
+//   if (!success && reachedPinLimit.value) {
+//     showToast("Pin limit reached. Upgrade for more pins.", "warning");
+//   }
+// };
 
 const handleEditVoyage = async () => {
-  if (!voyageId.value) return;
+  if (!voyage.value?.id) return;
 
   isSubmitting.value = true;
   try {
@@ -673,18 +666,18 @@ const handleEditVoyage = async () => {
 
     if (Object.keys(updates).length === 0) {
       showToast("No changes detected", "info");
-      navigateToVoyage(voyageId.value);
+      navigateToVoyage(voyage.value?.id);
       return;
     }
 
-    const updated = await handleUpdateVoyage(voyageId.value, {
+    const updated = await handleUpdateVoyage(voyage.value?.id, {
       ...formData.value,
       ...updates,
     });
 
     if (updated) {
       showToast("Voyage updated successfully!", "success");
-      navigateToVoyage(voyageId.value);
+      navigateToVoyage(voyage.value?.id);
     }
   } catch (err) {
     console.error("Error updating voyage:", err);
@@ -695,13 +688,13 @@ const handleEditVoyage = async () => {
 };
 
 // Watch pins for changes
-watch(
-  pins,
-  (nv) => {
-    formData.value.pins = nv;
-  },
-  { deep: true }
-);
+// watch(
+//   pins,
+//   (nv) => {
+//     formData.value.pins = nv;
+//   },
+//   { deep: true }
+// );
 
 interface DateRange extends Array<Date> {
   0: Date;
@@ -709,36 +702,36 @@ interface DateRange extends Array<Date> {
 }
 const dateRange = ref<DateRange | null>(null);
 
-const handleDateRangeChange = (range: DateRange | null) => {
-  if (range && range.length === 2) {
-    formData.value.start_date = formatDateForInput(range[0]);
-    formData.value.end_date = formatDateForInput(range[1]);
-  } else {
-    formData.value.start_date = "";
-    formData.value.end_date = "";
-  }
-};
+// const handleDateRangeChange = (range: DateRange | null) => {
+//   if (range && range.length === 2) {
+//     formData.value.start_date = formatDateForInput(range[0]);
+//     formData.value.end_date = formatDateForInput(range[1]);
+//   } else {
+//     formData.value.start_date = "";
+//     formData.value.end_date = "";
+//   }
+// };
 
 // Date constraints
-const minSelectableDate = computed(() => new Date());
-const maxSelectableDate = computed(() => {
-  const date = new Date();
-  date.setFullYear(date.getFullYear() + 1);
-  return date;
-});
+// const minSelectableDate = computed(() => new Date());
+// const maxSelectableDate = computed(() => {
+//   const date = new Date();
+//   date.setFullYear(date.getFullYear() + 1);
+//   return date;
+// });
 
 // Watch for location changes and update form data
-watch(selectedLocation, (newLocation) => {
-  if (newLocation) {
-    formData.value.location = newLocation.display_name;
-    formData.value.latitude = newLocation.lat;
-    formData.value.longitude = newLocation.lon;
-  } else {
-    formData.value.location = "";
-    formData.value.latitude = null;
-    formData.value.longitude = null;
-  }
-});
+// watch(selectedLocation, (newLocation) => {
+//   if (newLocation) {
+//     formData.value.location = newLocation.display_name;
+//     formData.value.latitude = newLocation.lat;
+//     formData.value.longitude = newLocation.lon;
+//   } else {
+//     formData.value.location = "";
+//     formData.value.latitude = null;
+//     formData.value.longitude = null;
+//   }
+// });
 
 const typedHandles = handles as HandleKey[];
 

@@ -2,9 +2,7 @@ import { supabase } from "@/config/supabase";
 import type { UserProfile } from "@/types/user";
 import { stripeService } from "@/services/stripe";
 
-export const upgradeToPremium = async (
-  userId: string
-): Promise<UserProfile> => {
+export const upgradeToPremium = async (): Promise<UserProfile> => {
   throw new Error("Use initiatePremiumCheckout for Stripe subscriptions");
 };
 

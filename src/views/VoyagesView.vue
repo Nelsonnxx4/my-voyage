@@ -27,8 +27,8 @@
     <!-- Profile modal -->
     <ReusableModal :isOpen="isProfileModal" @close="closeProfileModal">
       <UserModal
-        :username="userData.name"
-        :avatar-url="userData.profile_image"
+        :username="userData?.name ?? null"
+        :avatar-url="userData?.profile_image"
         @close="closeProfileModal"
       />
     </ReusableModal>
@@ -220,7 +220,7 @@ import UserModal from "@/components/UserModal.vue";
 import Logo from "@/assets/icons/Logo.vue";
 import AddIcon from "@/assets/icons/AddIcon.vue";
 import EditIcon from "@/assets/icons/EditIcon.vue";
-import HeartIcon from "@/assets/icons/HeartIcon.vue";
+// import HeartIcon from "@/assets/icons/HeartIcon.vue";
 import LocationIcon from "@/assets/icons/LocationIcon.vue";
 import WhatTimeIcon from "@/assets/icons/WhatTimeIcon.vue";
 import { useVoyageManager } from "@/composables/useVoyageManager";
@@ -238,7 +238,7 @@ const {
   listError,
   toggleMenu,
   navigateToCreate,
-  navigateToFavorites,
+  // navigateToFavorites,
   navigateToVoyage,
   openProfileModal,
   closeProfileModal,
@@ -262,19 +262,19 @@ const { userData } = useUserProfile();
 onMounted(() => {
   handleFetchVoyages();
 });
-const getFirstImageUrl = (imageUrls: any): string | null => {
+const getFirstImageUrl = (imageUrls: any): string | undefined => {
   try {
     if (Array.isArray(imageUrls)) {
-      return imageUrls[0] || null;
+      return imageUrls[0] || undefined;
     } else if (typeof imageUrls === "string") {
       // If it's a stringified array, parse it
       const parsed = JSON.parse(imageUrls);
-      return Array.isArray(parsed) ? parsed[0] : null;
+      return Array.isArray(parsed) ? parsed[0] : undefined;
     }
-    return null;
+    return undefined;
   } catch (error) {
     console.error("Error parsing image URLs:", error);
-    return null;
+    return undefined;
   }
 };
 </script>

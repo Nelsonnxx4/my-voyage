@@ -27,8 +27,8 @@
   <!-- Profile modal -->
   <ReusableModal :isOpen="isProfileModal" @close="closeProfileModal">
     <UserModal
-      :username="userData.name"
-      :avatar-url="userData.profile_image"
+      :username="userData?.name ?? null"
+      :avatar-url="userData?.profile_image"
       @close="closeProfileModal"
     />
   </ReusableModal>
@@ -190,7 +190,7 @@
             @close="isShareModalOpen = false"
           />
           <button
-            @click="handleDeleteVoyage(voyage.id)"
+            @click="handleDeleteVoyage(voyage!.id)"
             class="w-full flex justify-between items-center py-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
           >
             <span>Delete Voyage</span>
@@ -274,7 +274,6 @@ const loadVoyageData = async () => {
 
     voyage.value = foundVoyage;
   } catch (error) {
-    error.value = detailError.value;
     detailError.value = "Failed to load voyage";
   } finally {
     isDetailLoading.value = false;

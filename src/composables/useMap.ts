@@ -1,422 +1,432 @@
-import { ref, onUnmounted, onMounted, computed } from "vue";
-import maplibregl, {
-  type Map,
-  type Marker,
-  type LngLatLike,
-} from "maplibre-gl";
-import "maplibre-gl/dist/maplibre-gl.css";
-import { usePremium } from "@/composables/usePremium";
-import { debounce } from "@/utils/debounce";
-import type { LocationSuggestion, SelectedLocation } from "@/types/mapTypes";
+// import { ref, onUnmounted, onMounted, computed } from "vue";
+// import maplibregl, {
+//   type Map,
+//   type Marker,
+//   type LngLatLike,
+// } from "maplibre-gl";
+// import "maplibre-gl/dist/maplibre-gl.css";
+// import { usePremium } from "@/composables/usePremium";
+// import { debounce } from "@/utils/debounce";
+// import type { LocationSuggestion, SelectedLocation } from "@/types/mapTypes";
 
-export const useMap = () => {
-  const { limits } = usePremium();
-  const maxPinnedLocations = computed(() => limits.maxPinnedLocations ?? 3);
+// export const useMap = () => {
+//   const { limits } = usePremium();
+//   const maxPinnedLocations = computed(() => limits.maxPinnedLocations ?? 3);
 
-  const map = ref<Map>();
-  const mapContainer = ref<HTMLDivElement>();
-  const isMapInitialized = ref(false);
-  const selectedLocation = ref<SelectedLocation>(null);
-  const locationMarker = ref<Marker | null>(null);
-  const locationSearch = ref("");
-  const locationSuggestions = ref<LocationSuggestion[]>([]);
-  const isSearching = ref(false);
+//   const map = ref<Map | null>(null);
+//   const mapContainer = ref<HTMLDivElement | null>(null);
+//   const isMapInitialized = ref(false);
+//   const selectedLocation = ref<SelectedLocation>(null);
+//   const locationMarker = ref<Marker | null>(null);
+//   const locationSearch = ref("");
+//   const locationSuggestions = ref<LocationSuggestion[]>([]);
+//   const isSearching = ref(false);
 
-  // Multi-pin state
-  const markers = ref<Marker[]>([]);
-  const pins = ref<{ display_name: string; lat: number; lon: number }[]>([]);
+//   // Multi-pin state
+//   const markers = ref<Marker[]>([]);
+//   const pins = ref<{ display_name: string; lat: number; lon: number }[]>([]);
 
-  const initMap = async (
-    container: HTMLDivElement,
-    options = { center: [0, 20], zoom: 2 }
-  ) => {
-    try {
-      map.value = new maplibregl.Map({
-        container: container,
-        style: "https://demotiles.maplibre.org/style.json",
-        center: options.center as [number, number],
-        zoom: options.zoom,
-      });
+//   const initMap = async (
+//     container: HTMLDivElement,
+//     options = { center: [0, 20], zoom: 2 }
+//   ) => {
+//     try {
+//       map.value = new maplibregl.Map({
+//         container: container,
+//         style: "https://demotiles.maplibre.org/style.json",
+//         center: options.center as [number, number],
+//         zoom: options.zoom,
+//       });
 
-      // Add default controls
-      map.value.addControl(new maplibregl.NavigationControl(), "top-right");
-      map.value.addControl(new maplibregl.ScaleControl(), "bottom-left");
+//       // Add default controls
+//       // map.value.addControl(new maplibregl.NavigationControl(), "top-right");
+//       // map.value.addControl(new maplibregl.ScaleControl(), "bottom-left");
 
-      map.value.on("load", () => {
-        isMapInitialized.value = true;
-      });
+//       map.value.on("load", () => {
+//         isMapInitialized.value = true;
+//       });
 
-      // Set up click handler
-      map.value.on("click", (e) => {
-        handleMapClick(e.lngLat);
-      });
+//       // Set up click handler
+//       map.value.on("click", (e) => {
+//         handleMapClick(e.lngLat);
+//       });
 
-      return map.value;
-    } catch (error) {
-      console.error("Failed to initialize map:", error);
-      throw error;
-    }
-  };
+//       // return map.value;
+//     } catch (error) {
+//       console.error("Failed to initialize map:", error);
+//       throw error;
+//     }
+//   };
 
-  // Debounced search function to avoid too many API calls
-  const debouncedSearchLocation = debounce(async () => {
-    await searchLocation();
-  }, 300);
+//   const debouncedSearchLocation = debounce(async () => {
+//     await searchLocation();
+//   }, 300);
 
-  // Search for locations using Photon (CORS-friendly alternative to Nominatim)
-  const searchLocation = async () => {
-    const query = locationSearch.value.trim();
+//   const searchLocation = async () => {
+//     const query = locationSearch.value.trim();
 
-    if (query.length < 2) {
-      locationSuggestions.value = [];
-      isSearching.value = false;
-      return;
-    }
+//     if (query.length < 2) {
+//       locationSuggestions.value = [];
+//       isSearching.value = false;
+//       return;
+//     }
 
-    isSearching.value = true;
+//     isSearching.value = true;
 
-    try {
-      const response = await fetch(
-        `https://photon.komoot.io/api/?q=${encodeURIComponent(
-          query
-        )}&limit=8&lang=en`
-      );
+//     try {
+//       const response = await fetch(
+//         `https://photon.komoot.io/api/?q=${encodeURIComponent(
+//           query
+//         )}&limit=8&lang=en`
+//       );
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+//       if (!response.ok) {
+//         throw new Error(`HTTP error! status: ${response.status}`);
+//       }
 
-      const data = await response.json();
+//       const data = await response.json();
 
-      // Transform Photon response to match our expected format
-      locationSuggestions.value = (data.features || []).map((feature: any) => ({
-        display_name:
-          feature.properties.name ||
-          feature.properties.street ||
-          feature.properties.city ||
-          feature.properties.country ||
-          "Unknown location",
-        lat: feature.geometry.coordinates[1],
-        lon: feature.geometry.coordinates[0],
-        osm_id: feature.properties.osm_id,
-        osm_type: feature.properties.osm_type,
-        place_id: feature.properties.osm_id, // Using OSM ID as place_id
-      }));
-    } catch (error) {
-      console.error("Location search error:", error);
-      locationSuggestions.value = [];
+//       type PhotonFeature = {
+//         properties: {
+//           name?: string;
+//           street?: string;
+//           city?: string;
+//           country?: string;
+//           osm_id?: string | number;
+//           osm_type?: string;
+//         };
+//         geometry: {
+//           coordinates: [number, number];
+//         };
+//       };
 
-      // Fallback to local suggestions if API fails
-      if (query.length > 2) {
-        locationSuggestions.value = [
-          {
-            display_name: `Search for "${query}"`,
-            lat: 0,
-            lon: 0,
-            place_id: "fallback",
-          },
-        ];
-      }
-    } finally {
-      isSearching.value = false;
-    }
-  };
+//       locationSuggestions.value = (data.features || []).map(
+//         (feature: PhotonFeature) => ({
+//           display_name:
+//             feature.properties.name ||
+//             feature.properties.street ||
+//             feature.properties.city ||
+//             feature.properties.country ||
+//             "Unknown location",
+//           lat: feature.geometry.coordinates[1],
+//           lon: feature.geometry.coordinates[0],
+//           osm_id: feature.properties.osm_id,
+//           osm_type: feature.properties.osm_type,
+//           place_id: feature.properties.osm_id,
+//         })
+//       );
+//     } catch (error) {
+//       console.error("Location search error:", error);
+//       locationSuggestions.value = [];
 
-  // Handle location selection from search results
-  const selectSuggestion = (suggestion: LocationSuggestion) => {
-    const lat = suggestion.lat;
-    const lon = suggestion.lon;
+//       if (query.length > 2) {
+//         locationSuggestions.value = [
+//           {
+//             display_name: `Search for "${query}"`,
+//             lat: 0,
+//             lon: 0,
+//             place_id: "fallback",
+//           },
+//         ];
+//       }
+//     } finally {
+//       isSearching.value = false;
+//     }
+//   };
 
-    selectedLocation.value = {
-      display_name: suggestion.display_name,
-      lat,
-      lon,
-    };
+//   // Handle location selection from search results
+//   const selectSuggestion = (suggestion: LocationSuggestion) => {
+//     const lat = suggestion.lat;
+//     const lon = suggestion.lon;
 
-    flyTo([lon, lat], 14);
-    updateMarker([lon, lat], suggestion.display_name);
-    clearSuggestions();
-    locationSearch.value = suggestion.display_name; // Fill input with selected location
-  };
+//     selectedLocation.value = {
+//       display_name: suggestion.display_name,
+//       lat,
+//       lon,
+//     };
 
-  // Handle map click to select location
-  const handleMapClick = async (lngLat: { lng: number; lat: number }) => {
-    try {
-      // Use Photon for reverse geocoding
-      const response = await fetch(
-        `https://photon.komoot.io/reverse?lat=${lngLat.lat}&lon=${lngLat.lng}&lang=en`
-      );
+//     flyTo([lon, lat], 14);
+//     updateMarker([lon, lat], suggestion.display_name);
+//     clearSuggestions();
+//     locationSearch.value = suggestion.display_name;
+//   };
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+//   // Handle map click to select location
+//   const handleMapClick = async (lngLat: { lng: number; lat: number }) => {
+//     try {
+//       // Use Photon for reverse geocoding
+//       const response = await fetch(
+//         `https://photon.komoot.io/reverse?lat=${lngLat.lat}&lon=${lngLat.lng}&lang=en`
+//       );
 
-      const data = await response.json();
-      const feature = data.features?.[0];
+//       if (!response.ok) {
+//         throw new Error(`HTTP error! status: ${response.status}`);
+//       }
 
-      if (feature) {
-        const displayName =
-          feature.properties.name ||
-          feature.properties.street ||
-          feature.properties.city ||
-          feature.properties.country ||
-          `${lngLat.lat.toFixed(4)}, ${lngLat.lng.toFixed(4)}`;
+//       const data = await response.json();
+//       const feature = data.features?.[0];
 
-        selectedLocation.value = {
-          display_name: displayName,
-          lat: lngLat.lat,
-          lon: lngLat.lng,
-        };
+//       if (feature) {
+//         const displayName =
+//           feature.properties.name ||
+//           feature.properties.street ||
+//           feature.properties.city ||
+//           feature.properties.country ||
+//           `${lngLat.lat.toFixed(4)}, ${lngLat.lng.toFixed(4)}`;
 
-        updateMarker([lngLat.lng, lngLat.lat], displayName);
-      }
-    } catch (error) {
-      console.error("Error reverse geocoding:", error);
-      // Fallback to coordinates if reverse geocoding fails
-      const displayName = `${lngLat.lat.toFixed(4)}, ${lngLat.lng.toFixed(4)}`;
-      selectedLocation.value = {
-        display_name: displayName,
-        lat: lngLat.lat,
-        lon: lngLat.lng,
-      };
-      updateMarker([lngLat.lng, lngLat.lat], displayName);
-    }
-  };
+//         selectedLocation.value = {
+//           display_name: displayName,
+//           lat: lngLat.lat,
+//           lon: lngLat.lng,
+//         };
 
-  // Add a marker to the map
-  const addMarker = (
-    lngLat: LngLatLike,
-    options?: {
-      color?: string;
-      popup?: string;
-      title?: string;
-    }
-  ): Marker => {
-    if (!map.value) {
-      throw new Error("Map not initialized. Call initMap first.");
-    }
+//         updateMarker([lngLat.lng, lngLat.lat], displayName);
+//       }
+//     } catch (error) {
+//       console.error("Error reverse geocoding:", error);
+//       const displayName = `${lngLat.lat.toFixed(4)}, ${lngLat.lng.toFixed(4)}`;
+//       selectedLocation.value = {
+//         display_name: displayName,
+//         lat: lngLat.lat,
+//         lon: lngLat.lng,
+//       };
+//       updateMarker([lngLat.lng, lngLat.lat], displayName);
+//     }
+//   };
 
-    // Create custom marker element
-    const el = document.createElement("div");
-    el.className = "custom-marker-container";
-    el.innerHTML = `
-    <div class="custom-marker" style="background-color: ${
-      options?.color || "#006E63"
-    }">
-      <div class="marker-dot"></div>
-      ${
-        options?.title ? `<div class="marker-label">${options.title}</div>` : ""
-      }
-    </div>
-  `;
+//   // Add a marker to the map
+//   const addMarker = (
+//     lngLat: LngLatLike,
+//     options?: {
+//       color?: string;
+//       popup?: string;
+//       title?: string;
+//     }
+//   ): Marker => {
+//     if (!map.value) {
+//       throw new Error("Map not initialized. Call initMap first.");
+//     }
 
-    const marker = new maplibregl.Marker({
-      element: el,
-      anchor: "bottom",
-      offset: [0, -10],
-    })
-      .setLngLat(lngLat)
-      .addTo(map.value);
+//     // Create custom marker element
+//     const el = document.createElement("div");
+//     el.className = "custom-marker-container";
+//     el.innerHTML = `
+//     <div class="custom-marker" style="background-color: ${
+//       options?.color || "#006E63"
+//     }">
+//       <div class="marker-dot"></div>
+//       ${
+//         options?.title ? `<div class="marker-label">${options.title}</div>` : ""
+//       }
+//     </div>
+//   `;
 
-    if (options?.popup) {
-      const popup = new maplibregl.Popup({
-        offset: [0, -30],
-        closeOnClick: false,
-        className: "custom-marker-popup",
-        maxWidth: "300px",
-      }).setHTML(options.popup);
+//     const marker = new maplibregl.Marker({
+//       element: el,
+//       anchor: "bottom",
+//       offset: [0, -10],
+//     }).setLngLat(lngLat);
 
-      marker.setPopup(popup);
+//     if (map.value) {
+//       // marker.addTo(map.value);
+//     }
 
-      el.addEventListener("click", (e) => {
-        e.stopPropagation();
-        if (!marker.getPopup().isOpen()) {
-          closeAllPopups();
-        }
-        marker.togglePopup();
-      });
-    }
+//     if (options?.popup) {
+//       const popup = new maplibregl.Popup({
+//         offset: [0, -30],
+//         closeOnClick: false,
+//         className: "custom-marker-popup",
+//         maxWidth: "300px",
+//       }).setHTML(options.popup);
 
-    return marker;
-  };
+//       marker.setPopup(popup);
 
-  const updateMarker = (coordinates: [number, number], title: string) => {
-    if (locationMarker.value) {
-      locationMarker.value.remove();
-    }
-    locationMarker.value = addMarker(coordinates, {
-      color: "#006E63",
-      title: title[0],
-      popup: `
-      <div class="marker-popup-content">
-        <h3 class="font-medium text-base">${title}</h3>
-        <p class="text-sm text-gray-600 mt-1">
-          ${coordinates[1].toFixed(4)}, ${coordinates[0].toFixed(4)}
-        </p>
-      </div>
-    `,
-    });
-  };
+//       el.addEventListener("click", (e) => {
+//         e.stopPropagation();
+//         marker.togglePopup();
+//       });
+//     }
 
-  const closeAllPopups = () => {
-    document
-      .querySelectorAll(".custom-marker-container")
-      .forEach((markerEl) => {
-        const marker = [...markers.value].find(
-          (m) => m.getElement() === markerEl
-        );
-        marker?.getPopup()?.remove();
-      });
-  };
+//     return marker;
+//   };
 
-  // Fly to a location
-  const flyTo = (target: LngLatLike, zoom: number = 12) => {
-    if (!map.value) return;
-    map.value.flyTo({
-      center: target,
-      zoom,
-      essential: true,
-    });
-  };
+//   const updateMarker = (coordinates: [number, number], title: string) => {
+//     if (locationMarker.value) {
+//       locationMarker.value.remove();
+//     }
+//     locationMarker.value = addMarker(coordinates, {
+//       color: "#006E63",
+//       title: title,
+//       popup: `
+//       <div class="marker-popup-content">
+//         <h3 class="font-medium text-base">${title}</h3>
+//         <p class="text-sm text-gray-600 mt-1">
+//           ${coordinates[1].toFixed(4)}, ${coordinates[0].toFixed(4)}
+//         </p>
+//       </div>
+//     `,
+//     });
+//   };
 
-  // Use current geolocation
-  const useCurrentLocation = () => {
-    if (!navigator.geolocation) {
-      alert("Geolocation is not supported by your browser");
-      return;
-    }
+//   // const closeAllPopups = () => {
+//   //   document
+//   //     .querySelectorAll(".custom-marker-container")
+//   //     .forEach((markerEl) => {
+//   //       const marker = [...markers.value].find(
+//   //         (m: Marker) => m.getElement() === markerEl
+//   //       );
+//   //       marker?.getPopup()?.remove();
+//   //     });
+//   // };
 
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        handleMapClick({ lat: latitude, lng: longitude });
-        flyTo([longitude, latitude], 14);
-      },
-      (error) => {
-        console.error("Error getting location:", error);
-        alert("Unable to retrieve your location");
-      },
-      { enableHighAccuracy: true, timeout: 10000 }
-    );
-  };
+//   // Fly to a location
+//   const flyTo = (target: LngLatLike, zoom: number = 12) => {
+//     if (!map.value) return;
+//     map.value.flyTo({
+//       center: target,
+//       zoom,
+//       essential: true,
+//     });
+//   };
 
-  // Clear selected location
-  const clearLocation = () => {
-    selectedLocation.value = null;
-    locationSearch.value = "";
-    if (locationMarker.value) {
-      locationMarker.value.remove();
-      locationMarker.value = null;
-    }
-    clearSuggestions();
-  };
+//   // Use current geolocation
+//   const useCurrentLocation = () => {
+//     if (!navigator.geolocation) {
+//       alert("Geolocation is not supported by your browser");
+//       return;
+//     }
 
-  // Clear search suggestions
-  const clearSuggestions = () => {
-    locationSuggestions.value = [];
-  };
+//     navigator.geolocation.getCurrentPosition(
+//       (position) => {
+//         const { latitude, longitude } = position.coords;
+//         handleMapClick({ lat: latitude, lng: longitude });
+//         flyTo([longitude, latitude], 14);
+//       },
+//       (error) => {
+//         console.error("Error getting location:", error);
+//         alert("Unable to retrieve your location");
+//       },
+//       { enableHighAccuracy: true, timeout: 10000 }
+//     );
+//   };
 
-  // Zoom controls
-  const zoomIn = () => {
-    if (!map.value) return;
-    map.value.zoomIn();
-  };
+//   // Clear selected location
+//   const clearLocation = () => {
+//     selectedLocation.value = null;
+//     locationSearch.value = "";
+//     if (locationMarker.value) {
+//       locationMarker.value.remove();
+//       locationMarker.value = null;
+//     }
+//     clearSuggestions();
+//   };
 
-  const zoomOut = () => {
-    if (!map.value) return;
-    map.value.zoomOut();
-  };
+//   // Clear search suggestions
+//   const clearSuggestions = () => {
+//     locationSuggestions.value = [];
+//   };
 
-  // Pin management
-  const addPin = (pin: { display_name: string; lat: number; lon: number }) => {
-    if (pins.value.length >= maxPinnedLocations.value) return false;
-    pins.value.push(pin);
-    const marker = addMarker([pin.lon, pin.lat], {
-      color: "#0ea5e9",
-      title: pin.display_name[0],
-      popup: `
-      <div class="marker-popup-content">
-        <h3 class="font-medium text-base">${pin.display_name}</h3>
-        <p class="text-sm text-gray-600 mt-1">${pin.lat.toFixed(
-          4
-        )}, ${pin.lon.toFixed(4)}</p>
-      </div>
-      `,
-    });
-    markers.value.push(marker);
-    return true;
-  };
+//   // Zoom controls
+//   const zoomIn = () => {
+//     if (!map.value) return;
+//     map.value.zoomIn();
+//   };
 
-  const removePinAt = (index: number) => {
-    if (index < 0 || index >= pins.value.length) return;
-    pins.value.splice(index, 1);
-    const marker = markers.value.splice(index, 1)[0];
-    marker?.remove();
-  };
+//   const zoomOut = () => {
+//     if (!map.value) return;
+//     map.value.zoomOut();
+//   };
 
-  const clearPins = () => {
-    pins.value = [];
-    markers.value.forEach((m) => m.remove());
-    markers.value = [];
-  };
+//   // Pin management
+//   const addPin = (pin: { display_name: string; lat: number; lon: number }) => {
+//     if (pins.value.length >= maxPinnedLocations.value) return false;
+//     pins.value.push(pin);
+//     const marker = addMarker([pin.lon, pin.lat], {
+//       color: "#0ea5e9",
+//       title: pin.display_name,
+//       popup: `
+//       <div class="marker-popup-content">
+//         <h3 class="font-medium text-base">${pin.display_name}</h3>
+//         <p class="text-sm text-gray-600 mt-1">${pin.lat.toFixed(
+//           4
+//         )}, ${pin.lon.toFixed(4)}</p>
+//       </div>
+//       `,
+//     });
+//     markers.value.push(marker);
+//     return true;
+//   };
 
-  onUnmounted(() => {
-    if (locationMarker.value) {
-      locationMarker.value.remove();
-    }
-    markers.value.forEach((m) => m.remove());
-    map.value?.remove();
-  });
+//   const removePinAt = (index: number) => {
+//     if (index < 0 || index >= pins.value.length) return;
+//     pins.value.splice(index, 1);
+//     const marker = markers.value.splice(index, 1)[0];
+//     marker?.remove();
+//   };
 
-  onMounted(async () => {
-    if (mapContainer.value) {
-      await initMap(mapContainer.value);
-    }
-  });
-  return {
-    map,
-    mapContainer,
-    isMapInitialized,
-    selectedLocation,
-    locationSearch,
-    locationSuggestions,
-    isSearching,
+//   const clearPins = () => {
+//     pins.value = [];
+//     markers.value.forEach((m) => m.remove());
+//     markers.value = [];
+//   };
 
-    initMap,
-    searchLocation: debouncedSearchLocation, // Use debounced version
-    selectSuggestion,
-    useCurrentLocation,
-    clearLocation,
-    zoomIn,
-    zoomOut,
+//   onUnmounted(() => {
+//     if (locationMarker.value) {
+//       locationMarker.value.remove();
+//     }
+//     markers.value.forEach((m) => m.remove());
+//     map.value?.remove();
+//   });
 
-    // For form integration
-    getLocationData: () => ({
-      location: selectedLocation.value?.display_name || "",
-      latitude: selectedLocation.value?.lat || null,
-      longitude: selectedLocation.value?.lon || null,
-    }),
+//   onMounted(async () => {
+//     if (mapContainer.value) {
+//       await initMap(mapContainer.value);
+//     }
+//   });
+//   return {
+//     map,
+//     mapContainer,
+//     isMapInitialized,
+//     selectedLocation,
+//     locationSearch,
+//     locationSuggestions,
+//     isSearching,
 
-    // For editing existing voyages
-    setLocation: (locationData: {
-      display_name: string;
-      lat: number;
-      lon: number;
-    }) => {
-      selectedLocation.value = locationData;
-      locationSearch.value = locationData.display_name;
-      flyTo([locationData.lon, locationData.lat], 12);
-      updateMarker(
-        [locationData.lon, locationData.lat],
-        locationData.display_name
-      );
-    },
+//     initMap,
+//     searchLocation: debouncedSearchLocation, // Use debounced version
+//     selectSuggestion,
+//     useCurrentLocation,
+//     clearLocation,
+//     zoomIn,
+//     zoomOut,
 
-    // Pins API
-    pins,
-    addPin,
-    removePinAt,
-    clearPins,
-    maxPinnedLocations, // Export for UI
-  };
-};
+//     // For form integration
+//     getLocationData: () => ({
+//       location: selectedLocation.value?.display_name || "",
+//       latitude: selectedLocation.value?.lat || null,
+//       longitude: selectedLocation.value?.lon || null,
+//     }),
+
+//     // For editing existing voyages
+//     setLocation: (locationData: {
+//       display_name: string;
+//       lat: number;
+//       lon: number;
+//     }) => {
+//       selectedLocation.value = locationData;
+//       locationSearch.value = locationData.display_name;
+//       flyTo([locationData.lon, locationData.lat], 12);
+//       updateMarker(
+//         [locationData.lon, locationData.lat],
+//         locationData.display_name
+//       );
+//     },
+
+//     // Pins API
+//     pins,
+//     addPin,
+//     removePinAt,
+//     clearPins,
+//     maxPinnedLocations,
+//   };
+// };

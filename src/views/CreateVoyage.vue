@@ -1,6 +1,6 @@
 <template>
   <section class="flex justify-center items-center">
-    <div v-if="isLoading">
+    <div v-if="isDetailLoading">
       <EditVoyageSkeleton />
     </div>
     <main v-else class="bg-background100 py-2 mx-auto px-3 my-5">
@@ -197,10 +197,10 @@
             placeholder="A weekend in Monaco"
           />
 
-          <div class="space-y-2">
-            <label class="block text-textblack100 font-medium">Location</label>
+          <!-- <div class="space-y-2">
+            <label class="block text-textblack100 font-medium">Location</label> -->
 
-            <div class="flex gap-3">
+          <!-- <div class="flex gap-3">
               <div class="flex-1 relative">
                 <input
                   type="text"
@@ -239,7 +239,6 @@
             </div>
             <MapView />
 
-            <!-- Pin Controls -->
             <div class="mt-3 p-3 bg-gray-50 rounded-lg border">
               <div class="flex items-center justify-between mb-2">
                 <span class="text-sm font-medium text-gray-700">
@@ -275,7 +274,6 @@
               </div>
             </div>
 
-            <!-- Pinned List -->
             <div v-if="pins.length" class="mt-2 border rounded p-2 bg-white">
               <div
                 v-for="(p, i) in pins"
@@ -299,7 +297,7 @@
                 </button>
               </div>
             </div>
-          </div>
+          </div> -->
 
           <!-- Date range -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
@@ -307,10 +305,9 @@
               <label class="block text-textblack100 font-medium mb-1"
                 >Date range</label
               >
-              <Calendar
+              <!-- <Calendar
                 v-model="dateRange"
                 selectionMode="range"
-                @update:modelValue="handleDateRangeChange"
                 :minDate="minSelectableDate"
                 :maxDate="maxSelectableDate"
                 showIcon
@@ -319,7 +316,7 @@
                 dateFormat="yy-mm-dd"
                 :manualInput="false"
                 placeholder="Select trip dates"
-              />
+              /> -->
             </div>
           </div>
 
@@ -376,17 +373,17 @@
 
 <script setup lang="ts">
 // imports from vue
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onMounted } from "vue";
 // imports from PrimeVue
 import Editor from "primevue/editor";
 import Rating from "primevue/rating";
-import Calendar from "primevue/calendar";
+// import Calendar from "primevue/calendar";
 // imports from ui components
 import EditVoyageSkeleton from "@/components/ui/EditVoyageSkeleton.vue";
 import ReusableButton from "@/components/ui/ReusableButton.vue";
 import ReusableInput from "@/components/ui/ReusableInput.vue";
 import Spinner from "@/components/ui/Spinner.vue";
-import MapView from "@/components/MapView.vue";
+// import MapView from "@/components/MapView.vue";
 // imports from icons
 import EditIcon from "@/assets/icons/EditIcon.vue";
 import CloseIcon from "@/assets/icons/CloseIcon.vue";
@@ -394,20 +391,30 @@ import TrashIcon from "@/assets/icons/TrashIcon.vue";
 import CropIcon from "@/assets/icons/CropIcon.vue";
 import RotateRight from "@/assets/icons/RotateRight.vue";
 import RotateLeft from "@/assets/icons/RotateLeft.vue";
-import LocationIcon from "@/assets/icons/LocationIcon.vue";
+// import LocationIcon from "@/assets/icons/LocationIcon.vue";
 // imports from composables/functions/types
 import { useVoyageManager } from "@/composables/useVoyageManager";
 import { useImageUpload } from "@/composables/useImageUpload";
-import { useMap } from "@/composables/useMap";
+// import { useMap } from "@/composables/useMap";
 import { usePremium } from "@/composables/usePremium";
 import { genUtils } from "@/utils/genUtils";
-import type { LocationSuggestion } from "@/types/mapTypes";
+// import type { LocationSuggestion } from "@/types/mapTypes";
 import { setupStorageBucket } from "@/utils/storageSetup";
 
-const { isLoading, navigateToVoyages, handleCreateVoyage, formData, voyages } =
-  useVoyageManager();
+const {
+  isDetailLoading,
+  navigateToVoyages,
+  handleCreateVoyage,
+  formData,
+  voyages,
+} = useVoyageManager();
 
-const { isSubmitting, formatDateForInput, upgradeToPremium } = genUtils();
+const {
+  isSubmitting,
+  // formatDateForInput,
+  upgradeToPremium,
+} = genUtils();
+
 const {
   rotate,
   initCropper,
@@ -427,10 +434,10 @@ const {
   handles,
   imageStyle,
   cropBoxStyle,
-  cropBox,
+  // cropBox,
   croppedImage,
   dragOver,
-  fileInput,
+  // fileInput,
   isImgLoading,
   hasImage,
   showActionButtons,
@@ -447,19 +454,19 @@ const {
 
 const { limits, loadUserPlan } = usePremium();
 
-const {
-  selectedLocation,
-  locationSearch,
-  locationSuggestions,
-  isSearching,
-  pins,
-  searchLocation,
-  selectSuggestion,
-  useCurrentLocation,
-  addPin,
-  removePinAt,
-  maxPinnedLocations,
-} = useMap();
+// const {
+//   selectedLocation,
+//   locationSearch,
+//   locationSuggestions,
+//   isSearching,
+//   pins,
+//   searchLocation,
+//   selectSuggestion,
+//   useCurrentLocation,
+//   addPin,
+//   removePinAt,
+//   maxPinnedLocations,
+// } = useMap();
 
 onMounted(async () => {
   await loadUserPlan();
@@ -500,7 +507,7 @@ const onSubmit = async () => {
     const voyageData = {
       ...formData.value,
       image_urls: uploadedImageUrls,
-      pins: pins.value,
+      // pins: pins.value,
     };
 
     await handleCreateVoyage(voyageData);
@@ -509,70 +516,69 @@ const onSubmit = async () => {
   }
 };
 
-const reachedPinLimit = computed(
-  () => pins.value.length >= maxPinnedLocations.value
-);
+// const reachedPinLimit = computed(
+//   () => pins.value.length >= maxPinnedLocations.value
+// );
 
-// Auto-pin when selecting suggestion
-const selectAndPinSuggestion = (suggestion: LocationSuggestion) => {
-  selectSuggestion(suggestion);
+// // Auto-pin when selecting suggestion
+// const selectAndPinSuggestion = (suggestion: LocationSuggestion) => {
+//   selectSuggestion(suggestion);
 
-  // Auto-pin the selected location if not at limit
-  if (!reachedPinLimit.value) {
-    setTimeout(() => {
-      pinSelectedLocation();
-    }, 100);
-  }
-};
+//   // Auto-pin the selected location if not at limit
+//   if (!reachedPinLimit.value) {
+//     setTimeout(() => {
+//       pinSelectedLocation();
+//     }, 100);
+//   }
+// };
 
-const pinSelectedLocation = () => {
-  if (!selectedLocation.value) return;
+// const pinSelectedLocation = () => {
+//   if (!selectedLocation.value) return;
 
-  const success = addPin(selectedLocation.value);
-  if (!success && reachedPinLimit.value) {
-    // Show message about limit
-    console.warn("Pin limit reached");
-  }
-};
+//   const success = addPin(selectedLocation.value);
+//   if (!success && reachedPinLimit.value) {
+//     // Show message about limit
+//     console.warn("Pin limit reached");
+//   }
+// };
 
-watch(pins, (nv) => {
-  formData.value.pins = nv;
-});
+// watch(pins, (nv) => {
+//   formData.value.pins = nv;
+// });
 
-interface DateRange extends Array<Date> {
-  0: Date;
-  1: Date;
-}
-const dateRange = ref<DateRange | null>(null);
+// interface DateRange extends Array<Date> {
+//   0: Date;
+//   1: Date;
+// }
+// const dateRange = ref<DateRange | null>(null);
 
-const handleDateRangeChange = (range: DateRange | null) => {
-  if (range && range.length === 2) {
-    formData.value.start_date = formatDateForInput(range[0]);
-    formData.value.end_date = formatDateForInput(range[1]);
-  } else {
-    formData.value.start_date = "";
-    formData.value.end_date = "";
-  }
-};
+// const handleDateRangeChange = (range: DateRange | null) => {
+//   if (range && range.length === 2) {
+//     formData.value.start_date = formatDateForInput(range[0]);
+//     formData.value.end_date = formatDateForInput(range[1]);
+//   } else {
+//     formData.value.start_date = "";
+//     formData.value.end_date = "";
+//   }
+// };
 // Date constraints
-const minSelectableDate = computed(() => new Date());
-const maxSelectableDate = computed(() => {
-  const date = new Date();
-  date.setFullYear(date.getFullYear() + 1);
-  return date;
-});
-// Watch for location changes and update form data
-watch(selectedLocation, (newLocation) => {
-  if (newLocation) {
-    formData.value.location = newLocation.display_name;
-    formData.value.latitude = newLocation.lat;
-    formData.value.longitude = newLocation.lon;
-  } else {
-    formData.value.location = "";
-    formData.value.latitude = null;
-    formData.value.longitude = null;
-  }
-});
+// const minSelectableDate = computed(() => Date());
+// const maxSelectableDate = computed(() => {
+//   const date = new Date();
+//   date.setFullYear(date.getFullYear() + 1);
+//   return date;
+// });
+// watch(selectedLocation, (newLocation) => {
+//   if (newLocation) {
+//     formData.value.location = newLocation.display_name;
+//     formData.value.latitude = newLocation.lat;
+//     formData.value.longitude = newLocation.lon;
+//   } else {
+//     formData.value.location = "";
+//     formData.value.latitude = null;
+//     formData.value.longitude = null;
+//   }
+// });
 
 const typedHandles = handles as HandleKey[];
 // Add handleClasses mapping for crop handles
