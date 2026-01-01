@@ -1,6 +1,6 @@
 import { computed, onMounted, onUnmounted, ref, type Ref } from "vue";
 import { useRouter, useRoute } from "vue-router";
-import { type VoyageTypeInfo } from "@/types/voyage";
+// import { type VoyageTypeInfo } from "@/types/voyage";
 import { usePremium } from "@/composables/usePremium";
 import {
   createVoyage,
@@ -11,6 +11,27 @@ import {
 } from "@/services/supabase/voyage";
 import type { FormDataType } from "@/types/formData";
 import { showToast } from "@/utils/showToast";
+
+export type Rating = 1 | 2 | 3 | 4 | 5;
+
+export interface VoyageTypeInfo {
+  id: string;
+  image_urls: string[];
+  title: string;
+  notes: string;
+  user_id: string;
+  location: string;
+  latitude?: number;
+  longitude?: number;
+  start_date: string;
+  end_date: string;
+  rating: Rating;
+  pins?: { display_name: string; lat: number; lon: number }[];
+  comment?: string;
+  created_at: string;
+  updated_at?: string;
+  isFavourite?: boolean;
+}
 
 type ModalSize = "sm" | "md" | "lg" | "xl";
 

@@ -411,10 +411,31 @@ import { usePremium } from "@/composables/usePremium";
 import { genUtils } from "@/utils/genUtils";
 // import type { LocationSuggestion } from "@/types/mapTypes";
 import { type FormDataType } from "@/types/formData";
-import { type VoyageTypeInfo } from "@/types/voyage";
+// import { type VoyageTypeInfo } from "@/types/voyage";
 import { showToast } from "@/utils/showToast";
 
 const route = useRoute();
+
+export type RatingStars = 1 | 2 | 3 | 4 | 5;
+
+export interface VoyageTypeInfo {
+  id: string;
+  image_urls: string[];
+  title: string;
+  notes: string;
+  user_id: string;
+  location: string;
+  latitude?: number;
+  longitude?: number;
+  start_date: string;
+  end_date: string;
+  rating: RatingStars;
+  pins?: { display_name: string; lat: number; lon: number }[];
+  comment?: string;
+  created_at: string;
+  updated_at?: string;
+  isFavourite?: boolean;
+}
 
 const {
   isDetailLoading,
