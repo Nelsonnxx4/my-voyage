@@ -1,7 +1,7 @@
 import { supabase } from "@/config/supabase";
 import { supabaseApi } from "@/config/axios";
-import type { FormDataType } from "@/types/formData";
-import type { VoyageTypeInfo, Rating } from "@/types/voyage";
+import { FormDataType } from "@/types/formData";
+import { VoyageTypeInfo, Rating } from "@/types/voyage";
 
 export const fetchVoyages = async (): Promise<VoyageTypeInfo[]> => {
   const {

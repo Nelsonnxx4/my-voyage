@@ -1,6 +1,6 @@
 import { computed, onMounted, onUnmounted, ref, type Ref } from "vue";
 import { useRouter, useRoute } from "vue-router";
-import type { VoyageTypeInfo } from "@/types/voyage";
+import type { VoyageTypeInfo } from "../types/voyage";
 import { usePremium } from "@/composables/usePremium";
 import {
   createVoyage,
@@ -11,7 +11,6 @@ import {
 } from "@/services/supabase/voyage";
 import type { FormDataType } from "@/types/formData";
 import { showToast } from "@/utils/showToast";
-// import type { LocationSuggestion } from "@/composables/useMap";
 
 type ModalSize = "sm" | "md" | "lg" | "xl";
 
@@ -287,9 +286,10 @@ export const useVoyageManager = (): VoyageManager => {
 
       const updated = await updateVoyage(voyageId, data);
 
-      console.log("1", updated);
       if (updated && typeof updated === "object") {
-        const idx = voyages.value.findIndex((v) => v.id === voyageId);
+        const idx = voyages.value.findIndex(
+          (v: VoyageTypeInfo) => v.id === voyageId
+        );
         if (idx !== -1) {
           voyages.value[idx] = updated;
         }
@@ -328,11 +328,13 @@ export const useVoyageManager = (): VoyageManager => {
 
   const handleDeleteVoyage = async (voyageId: string): Promise<void> => {
     try {
-      isDetailLoading.value = true; // Use detail loading
-      detailError.value = null; // Use detail error
+      isDetailLoading.value = true;
+      detailError.value = null;
 
       await deleteVoyage(voyageId);
-      voyages.value = voyages.value.filter((voyage) => voyage.id !== voyageId);
+      voyages.value = voyages.value.filter(
+        (voyage: VoyageTypeInfo) => voyage.id !== voyageId
+      );
 
       showToast("Voyage deleted", "success");
       closeModal();
@@ -360,7 +362,7 @@ export const useVoyageManager = (): VoyageManager => {
 
   // Filter favorite voyages
   const favoriteVoyages = computed(() => {
-    return voyages.value.filter((voyage) =>
+    return voyages.value.filter((voyage: VoyageTypeInfo) =>
       favorites.value.includes(voyage.id)
     );
   });
