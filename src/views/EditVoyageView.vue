@@ -249,9 +249,9 @@
                 <span class="hidden sm:inline">My Location</span>
               </button>
             </div>
-            <MapView />
+            <MapView />-->
 
-            <!-- Pin Controls -->
+          <!-- Pin Controls -->
           <!-- <div class="mt-3 p-3 bg-gray-50 rounded-lg border">
               <div class="flex items-center justify-between mb-2">
                 <span class="text-sm font-medium text-gray-700">
@@ -285,9 +285,9 @@
                   Upgrade for {{ 8 - maxPinnedLocations }} more pins
                 </button>
               </div>
-            </div>
+            </div> -->
 
-            <!-- Pinned List -->
+          <!-- Pinned List -->
           <!-- <div v-if="pins.length" class="mt-2 border rounded p-2 bg-white">
               <div
                 v-for="(p, i) in pins"
@@ -306,7 +306,6 @@
               </div>
             </div>
           </div> -->
-          --> -->
 
           <!-- Date range -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
@@ -411,8 +410,8 @@ import { useImageUpload } from "@/composables/useImageUpload";
 import { usePremium } from "@/composables/usePremium";
 import { genUtils } from "@/utils/genUtils";
 // import type { LocationSuggestion } from "@/types/mapTypes";
-import type { FormDataType } from "@/types/formData";
-import { VoyageTypeInfo } from "@/types/voyage";
+import { type FormDataType } from "@/types/formData";
+import { type VoyageTypeInfo } from "@/types/voyage";
 import { showToast } from "@/utils/showToast";
 
 const route = useRoute();

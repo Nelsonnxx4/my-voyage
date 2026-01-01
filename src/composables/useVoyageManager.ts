@@ -1,6 +1,6 @@
 import { computed, onMounted, onUnmounted, ref, type Ref } from "vue";
 import { useRouter, useRoute } from "vue-router";
-import type { VoyageTypeInfo } from "../types/voyage";
+import { type VoyageTypeInfo } from "@/types/voyage";
 import { usePremium } from "@/composables/usePremium";
 import {
   createVoyage,
