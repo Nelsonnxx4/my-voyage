@@ -411,7 +411,7 @@ import { usePremium } from "@/composables/usePremium";
 import { genUtils } from "@/utils/genUtils";
 // import type { LocationSuggestion } from "@/types/mapTypes";
 import { type FormDataType } from "@/types/formData";
-import { type VoyageTypeInfo } from "@/types/voyage";
+import { type VoyageTypeInfo } from "@/types/voyage.ts";
 import { showToast } from "@/utils/showToast";
 
 const route = useRoute();
