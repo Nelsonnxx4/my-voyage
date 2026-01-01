@@ -1,4 +1,4 @@
-import { type Rating } from "../types/voyage.ts";
+import { type Rating } from "@/types/voyage";
 
 export const getRatingComment = (rating: Rating): string => {
   const ratingMap: Record<Rating, string> = {
