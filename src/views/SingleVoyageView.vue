@@ -152,13 +152,13 @@
       </div>
 
       <!-- Right Column - Map -->
-      <div class="w-full lg:w-[40%] xl:w-[35%]">
+      <!-- <div class="w-full lg:w-[40%] xl:w-[35%]">
         <div
           class="sticky top-6 h-[400px] sm:h-[500px] lg:h-[550px] rounded-xl overflow-hidden shadow-sm"
         >
           <MapView :location="voyage.location" />
         </div>
-      </div>
+      </div> --->
     </div>
 
     <!-- Options Modal -->
@@ -209,7 +209,7 @@ import { useRoute } from "vue-router";
 import UserModal from "@/components/UserModal.vue";
 import Rating from "@/components/Rating.vue";
 
-import MapView from "@/components/MapView.vue";
+// import MapView from "@/components/MapView.vue";
 import ShareModal from "@/components/ShareModal.vue";
 import ReusableModal from "@/components/ui/ReusableModal.vue";
 import SingleVoyageSkeleton from "@/components/ui/SingleVoyageSkeleton.vue";
