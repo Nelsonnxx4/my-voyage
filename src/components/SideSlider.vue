@@ -24,7 +24,7 @@
         />
       </div>
 
-      <nav class="flex-1 overflow-y-auto p-4">
+      <nav class="flex-col overflow-y-auto p-4">
         <ul class="pb-10">
           <li>
             <a
