@@ -15,7 +15,7 @@
               class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100 mb-3"
             >
               <!-- <DangerIcon /> -->
-              <!-- <LogOutIcon fillColor="#dc2626" /> -->
+              <LogoutIcon fillColor="#dc2626" />
             </div>
 
             <h2 class="text-lg font-medium text-gray-900">Confirm Logout</h2>
@@ -47,7 +47,7 @@
 </template>
 
 <script setup lang="ts">
-// import LogOutIcon from "@/assets/icons/LogoutIcon.vue";
+import LogoutIcon from "@/assets/icons/LogoutIcon.vue";
 import { ref, onMounted, onBeforeUnmount } from "vue";
 
 const props = defineProps({

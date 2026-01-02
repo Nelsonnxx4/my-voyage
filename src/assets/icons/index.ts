@@ -15,7 +15,7 @@ export { default as CloseIcon } from "@/assets/icons/CloseIcon.vue";
 export { default as CopyIcon } from "@/assets/icons/CopyIcon.vue";
 export { default as CopiedIcon } from "@/assets/icons/CopiedIcon.vue";
 export { default as DownloadIcon } from "@/assets/icons/DownloadIcon.vue";
-// export { default as LogoutIcon } from "@/assets/icons/LogoutIcon.vue";
+export { default as LogoutIcon } from "@/assets/icons/LogoutIcon.vue";
 export { default as DangerIcon } from "@/assets/icons/DangerIcon.vue";
 export { default as PremiumIcon } from "@/assets/icons/PremiumIcon.vue";
 export { default as LocationIcon } from "@/assets/icons/LocationIcon.vue";
