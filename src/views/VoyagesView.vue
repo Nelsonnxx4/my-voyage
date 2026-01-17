@@ -86,7 +86,7 @@
         <article
           v-for="voyage in voyages"
           :key="voyage.id"
-          class="relative rounded-xl bg-white dark:bg-dark-background100 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden border border-gray-100 dark:border-dark-border100 min-w-[100px] sm:min-w-[400px] md:min-w-[400px] lg:min-w-[350px] xl:min-w-[450px] mx-auto"
+          class="relative rounded-xl bg-white dark:bg-dark-background100 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden border border-gray-100 dark:border-dark-border100 min-w-[200px] sm:min-w-[400px] md:min-w-[400px] lg:min-w-[350px] xl:min-w-[450px] mx-auto"
           @click="navigateToVoyage(voyage.id)"
         >
           <!-- Image with Favorite Button -->
