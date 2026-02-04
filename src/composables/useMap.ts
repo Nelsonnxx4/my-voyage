@@ -16,11 +16,7 @@ export class MapboxService {
   private supabase: SupabaseClient;
   private markers: mapboxgl.Marker[] = [];
 
-  constructor(
-    private mapboxToken: string,
-    supabaseUrl: string,
-    supabaseKey: string
-  ) {
+  constructor(mapboxToken: string, supabaseUrl: string, supabaseKey: string) {
     mapboxgl.accessToken = mapboxToken;
     this.supabase = createClient(supabaseUrl, supabaseKey);
   }

@@ -1,5 +1,5 @@
 <template>
-  <main class="w-full rounded-2xl z-50 max-h-[90vh] overflow-y-auto">
+  <main class="w-full rounded-2xl z-50 max-h-[80vh] overflow-y-auto">
     <!-- Header -->
     <div
       class="flex justify-between items-center mb-6 sticky top-0 bg-white dark:bg-dark-background100 z-10 pb-4"
