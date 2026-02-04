@@ -1,14 +1,12 @@
-<script lang="ts">
-export default {
-  name: "MapDisplay",
-};
-</script>
-
 <template>
   <main>
     <div ref="mapContainer" class="map-container"></div>
   </main>
 </template>
+
+<script lang="ts">
+export default { name: "MapDisplay" };
+</script>
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from "vue";
