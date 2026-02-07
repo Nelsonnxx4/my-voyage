@@ -157,9 +157,9 @@
           class="sticky top-6 h-[400px] sm:h-[500px] lg:h-[550px] rounded-xl overflow-hidden shadow-sm"
         >
           <Map
-            :mapboxToken="import.meta.env.VITE_MAPBOX_TOKEN"
-            :supabaseUrl="import.meta.env.VITE_SUPABASE_URL"
-            :supabaseKey="import.meta.env.VITE_SUPABASE_KEY"
+            :mapboxToken="mapboxToken"
+            :supabaseUrl="supabaseUrl"
+            :supabaseKey="supabaseKey"
           />
         </div>
       </div>
@@ -255,6 +255,10 @@ const { userData } = useUserProfile();
 const route = useRoute();
 
 const isShareModalOpen = ref<boolean>(false);
+
+const mapboxToken = import.meta.env.VITE_MAPBOX_TOKEN;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseKey = import.meta.env.VITE_SUPABASE_KEY;
 
 // Istanbul coordinates (example: latitude and longitude)
 // const istanbul = {
