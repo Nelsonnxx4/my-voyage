@@ -28,11 +28,11 @@ const props = defineProps<{
   mapboxToken: string;
   supabaseUrl: string;
   supabaseKey: string;
-  initialLocation?: {
-    latitude: number;
-    longitude: number;
-    zoom?: number;
-  };
+  //   initialLocation?: {
+  //     latitude: number;
+  //     longitude: number;
+  //     zoom?: number;
+  //   };
 }>();
 
 // Refs
@@ -50,10 +50,10 @@ onMounted(async () => {
   map.value = new mapboxgl.Map({
     container: mapContainer.value,
     style: "mapbox://styles/mapbox/streets-v12",
-    center: props.initialLocation
-      ? [props.initialLocation.longitude, props.initialLocation.latitude]
-      : [-74.5, 40], // Default to NYC
-    zoom: props.initialLocation?.zoom || 9,
+    // center: props.initialLocation
+    //   ? [props.initialLocation.longitude, props.initialLocation.latitude]
+    //   : [-74.5, 40], // Default to NYC
+    // zoom: props.initialLocation?.zoom || 9,
   });
 
   // Add navigation controls

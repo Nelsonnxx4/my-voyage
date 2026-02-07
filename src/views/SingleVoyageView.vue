@@ -152,13 +152,17 @@
       </div>
 
       <!-- Right Column - Map -->
-      <!-- <div class="w-full lg:w-[40%] xl:w-[35%]">
+      <div class="w-full lg:w-[40%] xl:w-[35%]">
         <div
           class="sticky top-6 h-[400px] sm:h-[500px] lg:h-[550px] rounded-xl overflow-hidden shadow-sm"
         >
-          <MapView :location="voyage.location" />
+          <Map
+            :mapboxToken="import.meta.env.VITE_MAPBOX_TOKEN"
+            :supabaseUrl="import.meta.env.VITE_SUPABASE_URL"
+            :supabaseKey="import.meta.env.VITE_SUPABASE_KEY"
+          />
         </div>
-      </div> --->
+      </div>
     </div>
 
     <!-- Options Modal -->
@@ -209,7 +213,7 @@ import { useRoute } from "vue-router";
 import UserModal from "@/components/UserModal.vue";
 import Rating from "@/components/Rating.vue";
 
-// import MapView from "@/components/MapView.vue";
+import Map from "@/components/Map.vue";
 import ShareModal from "@/components/ShareModal.vue";
 import ReusableModal from "@/components/ui/ReusableModal.vue";
 import SingleVoyageSkeleton from "@/components/ui/SingleVoyageSkeleton.vue";
@@ -251,6 +255,12 @@ const { userData } = useUserProfile();
 const route = useRoute();
 
 const isShareModalOpen = ref<boolean>(false);
+
+// Istanbul coordinates (example: latitude and longitude)
+// const istanbul = {
+//   lat: 41.0082,
+//   lng: 28.9784,
+// };
 
 const openShareModal = () => {
   isShareModalOpen.value = true;
