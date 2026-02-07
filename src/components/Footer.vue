@@ -1,7 +1,7 @@
 <template>
-  <footer class="bg-black px-4 py-4">
+  <footer class="bg-black px-4 py-4 lg:p-8">
     <main>
-      <div class="flex justify-start items-center">
+      <div class="flex justify-start items-center gap-2 pb-2">
         <Logo />
         <h4 class="text-inputColor200 font-medium">Zende</h4>
       </div>

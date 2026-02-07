@@ -1,19 +1,5 @@
 <template>
   <div class="bg-gray-50">
-    <!-- <header
-      :class="[
-        'sticky top-0 z-50 backdrop-blur-md border-b py-2 transition-all duration-300',
-        isScrolled
-          ? 'bg-white/90 backdrop-blur-lg shadow-md'
-          : 'bg-white/70 backdrop-blur-md shadow-sm',
-      ]"
-    >
-      <router-link to="/" class="flex items-center justify-start">
-        <Logo />
-        <h4 class="text-gray-900 font-medium">Zende</h4>
-      </router-link>
-    </header> -->
-
     <Header />
     <div class="max-w-7xl mx-auto pt-6 px-4 mt-12 sm:px-4 lg:px-6">
       <div class="text-center mt-4 mb-12">

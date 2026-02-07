@@ -24,16 +24,16 @@
         />
       </div>
 
-      <nav class="flex-col overflow-y-auto p-4">
-        <ul class="pb-10">
-          <li>
-            <a
-              v-for="(item, index) in NavPaths"
-              :key="index"
-              :href="item.href"
-              class="text-[16px] text-accent100 hover:text-accent50 font-medium transition-colors duration-200 md:mr-2 lg:mr-3"
-              @click.prevent="scrollToSection(item.href)"
-            >
+      <nav class="flex flex-col overflow-y-auto p-4">
+        <ul class="pb-10 flex flex-col gap-2">
+          <li
+            v-for="(item, index) in NavPaths"
+            :key="index"
+            :href="item.href"
+            class="text-[16px] text-accent100 hover:text-accent50 font-medium transition-colors duration-200 md:mr-2 lg:mr-3"
+            @click.prevent="scrollToSection(item.href)"
+          >
+            <a>
               {{ item.name }}
             </a>
           </li>

@@ -17,14 +17,14 @@
       class="hidden md:flex justify-between items-center text-sm text-textblack300"
     >
       <ul class="flex justify-between items-center gap-2">
-        <li>
-          <a
-            v-for="(item, index) in NavPaths"
-            :key="index"
-            :href="item.href"
-            class="text-[16px] text-accent100 hover:text-accent50 font-medium transition-colors duration-200 md:mr-2 lg:mr-3"
-            @click.prevent="scrollToSection(item.href)"
-          >
+        <li
+          v-for="(item, index) in NavPaths"
+          :key="index"
+          :href="item.href"
+          class="text-[16px] text-accent100 hover:text-accent50 font-medium transition-colors duration-200 md:mr-2 lg:mr-3"
+          @click.prevent="scrollToSection(item.href)"
+        >
+          <a>
             {{ item.name }}
           </a>
         </li>
@@ -37,7 +37,9 @@
           </router-link>
         </li>
       </ul>
+    </nav>
 
+    <div>
       <router-link
         v-if="!user"
         to="/login"
@@ -55,7 +57,7 @@
         <span> Get Started </span>
         <ArrowOut />
       </router-link>
-    </nav>
+    </div>
 
     <!-- Mobile -->
     <Menu
