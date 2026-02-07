@@ -283,8 +283,8 @@ const loadVoyageData = async () => {
     }
 
     voyage.value = foundVoyage;
-  } catch (error) {
-    detailError.value = "Failed to load voyage";
+  } catch (error: any) {
+    detailError.value = error;
   } finally {
     isDetailLoading.value = false;
   }

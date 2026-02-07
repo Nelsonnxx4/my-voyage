@@ -45,4 +45,8 @@
 
 <script setup lang="ts">
 import Logo from "@/assets/icons/Logo.vue";
+
+defineOptions({
+  name: "AppFooter",
+});
 </script>
