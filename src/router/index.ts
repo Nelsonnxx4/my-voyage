@@ -36,7 +36,7 @@ const routes: AppRouteRecordRaw[] = [
   },
   {
     path: "/auth/callback",
-    name: "auth-callback",
+    name: "AuthCallback",
     component: () => import("@/views/AuthCallBackView.vue"),
   },
   {
