@@ -39,7 +39,7 @@
       </ul>
     </nav>
 
-    <div>
+    <div class="hidden md:flex">
       <router-link
         v-if="!user"
         to="/login"
