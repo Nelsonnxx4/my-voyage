@@ -157,9 +157,9 @@
           class="sticky top-6 h-[400px] sm:h-[500px] lg:h-[550px] rounded-xl overflow-hidden shadow-sm"
         >
           <Map
-            :mapboxToken="import.meta.env.VITE_MAPBOX_TOKEN"
-            :supabaseUrl="import.meta.env.VITE_SUPABASE_URL"
-            :supabaseKey="import.meta.env.VITE_SUPABASE_KEY"
+            :mapboxToken="mapboxToken"
+            :supabaseUrl="supabaseUrl"
+            :supabaseKey="supabaseKey"
           />
         </div>
       </div>
@@ -260,7 +260,10 @@ const openShareModal = () => {
   isShareModalOpen.value = true;
 };
 
-// FIXED: Better error handling and logging
+const mapboxToken = import.meta.env.VITE_MAPBOX_TOKEN;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseKey = import.meta.env.VITE_SUPABASE_KEY;
+
 const loadVoyageData = async () => {
   const id = route.params.id as string;
 
