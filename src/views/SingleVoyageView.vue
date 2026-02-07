@@ -157,9 +157,9 @@
           class="sticky top-6 h-[400px] sm:h-[500px] lg:h-[550px] rounded-xl overflow-hidden shadow-sm"
         >
           <Map
-            :mapboxToken="mapboxToken"
-            :supabaseUrl="supabaseUrl"
-            :supabaseKey="supabaseKey"
+            :mapboxToken="import.meta.env.VITE_MAPBOX_TOKEN"
+            :supabaseUrl="import.meta.env.VITE_SUPABASE_URL"
+            :supabaseKey="import.meta.env.VITE_SUPABASE_KEY"
           />
         </div>
       </div>
@@ -256,43 +256,56 @@ const route = useRoute();
 
 const isShareModalOpen = ref<boolean>(false);
 
-const mapboxToken = import.meta.env.VITE_MAPBOX_TOKEN;
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseKey = import.meta.env.VITE_SUPABASE_KEY;
-
-// Istanbul coordinates (example: latitude and longitude)
-// const istanbul = {
-//   lat: 41.0082,
-//   lng: 28.9784,
-// };
-
 const openShareModal = () => {
   isShareModalOpen.value = true;
 };
 
+// FIXED: Better error handling and logging
 const loadVoyageData = async () => {
   const id = route.params.id as string;
 
-  if (!id) return;
+  console.log("📍 SingleVoyageView - Loading voyage");
+  console.log("   Route ID:", id);
+  console.log("   Current path:", route.path);
+
+  if (!id) {
+    console.error("❌ No voyage ID in route params");
+    detailError.value = "No voyage ID provided";
+    isDetailLoading.value = false;
+    return;
+  }
 
   isDetailLoading.value = true;
   detailError.value = null;
 
   try {
+    console.log("🔍 Fetching voyage with ID:", id);
     const foundVoyage = await handleFetchSingleVoyage(id);
 
     if (!foundVoyage) {
+      console.warn("⚠️ Voyage not found for ID:", id);
       detailError.value = "Voyage not found";
+      // IMPORTANT: Stay on page, don't redirect
+      isDetailLoading.value = false;
       return;
     }
 
+    console.log("✅ Voyage loaded successfully:", foundVoyage.title);
     voyage.value = foundVoyage;
   } catch (error: any) {
-    detailError.value = error;
+    console.error("❌ Error loading voyage:", error);
+    detailError.value = error?.message || "Failed to load voyage";
+    // IMPORTANT: Stay on page and show error, don't redirect
   } finally {
     isDetailLoading.value = false;
   }
 };
 
-onMounted(loadVoyageData);
+onMounted(async () => {
+  console.log("🎬 SingleVoyageView mounted");
+  console.log("   User data:", userData.value?.email);
+  console.log("   Route params:", route.params);
+
+  await loadVoyageData();
+});
 </script>

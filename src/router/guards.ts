@@ -9,11 +9,42 @@ export function setupRouter(routes: AppRouteRecordRaw[]) {
     routes,
   });
 
-  router.beforeEach(async (to) => {
-    const { checkAuth, user } = useAuth();
-    const isAuthenticated = await checkAuth();
+  let isCheckingAuth = false;
 
-    if (to.meta.requiresAuth && !isAuthenticated) {
+  router.beforeEach(async (to) => {
+    if (isCheckingAuth) {
+      return true;
+    }
+
+    const { checkAuth, user } = useAuth();
+
+    if (!to.meta.requiresAuth) {
+      if (to.meta.guestOnly) {
+        isCheckingAuth = true;
+        const isAuthenticated = await checkAuth();
+        isCheckingAuth = false;
+
+        if (isAuthenticated) {
+          console.log("Authenticated user on guest-only page");
+          return { path: "/voyages" };
+        }
+      }
+      return true;
+    }
+
+    isCheckingAuth = true;
+    const isAuthenticated = await checkAuth();
+    isCheckingAuth = false;
+
+    console.log(
+      "🔐 Auth check for route:",
+      to.path,
+      "Authenticated:",
+      isAuthenticated
+    );
+
+    if (!isAuthenticated) {
+      console.log("❌ Not authenticated, redirecting to login");
       return { path: "/login", query: { redirect: to.fullPath } };
     }
 
@@ -23,6 +54,7 @@ export function setupRouter(routes: AppRouteRecordRaw[]) {
         await checkStatus();
 
         if (!isPremium) {
+          console.log("⚠️ Premium required, redirecting to pricing");
           return { path: "/pricing", query: { redirect: to.fullPath } };
         }
       } catch (error) {
@@ -30,14 +62,12 @@ export function setupRouter(routes: AppRouteRecordRaw[]) {
       }
     }
 
-    if (to.meta.guestOnly && isAuthenticated) {
-      return { path: "/voyages" };
-    }
-
     if ((to.path === "/login" || to.path === "/signup") && isAuthenticated) {
+      console.log("✅ Authenticated user on auth page, redirecting to voyages");
       return { path: "/voyages" };
     }
 
+    console.log("✅ Navigation allowed to:", to.path);
     return true;
   });
 

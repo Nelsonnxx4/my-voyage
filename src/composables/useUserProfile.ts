@@ -2,7 +2,7 @@ import { ref, computed, watchEffect } from "vue";
 import { supabase } from "@/config/supabase";
 import type { UserProfile } from "@/types/user";
 import { useAuth } from "./useAuth";
-import { useRouter } from "vue-router";
+// import { useRouter } from "vue-router";
 import {
   getUserProfile,
   updateProfile,
@@ -22,7 +22,7 @@ export const useUserProfile = () => {
   const isEmailConfirmed = ref<boolean>(false);
   const isUpdating = ref<boolean>(false);
 
-  const router = useRouter();
+  // const router = useRouter();
   const { user: authUser } = useAuth();
 
   const maskedEmail = computed(() => {
@@ -293,16 +293,16 @@ export const useUserProfile = () => {
     }
   });
 
-  // Watch for auth changes
+  // Watch for auth changes - FIXED: Don't auto-redirect
   watchEffect(async () => {
     try {
       if (authUser.value && authUser.value.id) {
         await handleFetchUserProfile(authUser.value.id);
       } else {
         userData.value = null;
-        if (router?.currentRoute?.value?.path !== "/login") {
-          router?.push("/login");
-        }
+        // REMOVED: Auto-redirect to login
+        // Let router guards handle authentication redirects
+        // This prevents unwanted redirects when viewing protected pages
       }
     } catch (err) {
       console.error("Auth watch error:", err);
