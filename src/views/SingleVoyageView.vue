@@ -298,17 +298,12 @@ const loadVoyageData = async () => {
   } catch (error: any) {
     console.error("❌ Error loading voyage:", error);
     detailError.value = error?.message || "Failed to load voyage";
-    // IMPORTANT: Stay on page and show error, don't redirect
   } finally {
     isDetailLoading.value = false;
   }
 };
 
 onMounted(async () => {
-  console.log("🎬 SingleVoyageView mounted");
-  console.log("   User data:", userData.value?.email);
-  console.log("   Route params:", route.params);
-
   await loadVoyageData();
 });
 </script>
