@@ -156,11 +156,7 @@
         <div
           class="sticky top-6 h-[400px] sm:h-[500px] lg:h-[550px] rounded-xl overflow-hidden shadow-sm"
         >
-          <Map
-            :mapboxToken="mapboxToken"
-            :supabaseUrl="supabaseUrl"
-            :supabaseKey="supabaseKey"
-          />
+          <MapView map-height="400px" :initial-zoom="13" />
         </div>
       </div>
     </div>
@@ -213,7 +209,7 @@ import { useRoute } from "vue-router";
 import UserModal from "@/components/UserModal.vue";
 import Rating from "@/components/Rating.vue";
 
-import Map from "@/components/Map.vue";
+import MapView from "@/components/MapView.vue";
 import ShareModal from "@/components/ShareModal.vue";
 import ReusableModal from "@/components/ui/ReusableModal.vue";
 import SingleVoyageSkeleton from "@/components/ui/SingleVoyageSkeleton.vue";
@@ -259,10 +255,6 @@ const isShareModalOpen = ref<boolean>(false);
 const openShareModal = () => {
   isShareModalOpen.value = true;
 };
-
-const mapboxToken = import.meta.env.VITE_MAPBOX_TOKEN;
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseKey = import.meta.env.VITE_SUPABASE_KEY;
 
 const loadVoyageData = async () => {
   const id = route.params.id as string;

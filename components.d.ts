@@ -19,6 +19,7 @@ declare module 'vue' {
     Hero: typeof import('./src/components/Hero.vue')['default']
     LogoutModal: typeof import('./src/components/LogoutModal.vue')['default']
     Map: typeof import('./src/components/Map.vue')['default']
+    MapView: typeof import('./src/components/MapView.vue')['default']
     PremiumButton: typeof import('./src/components/ui/PremiumButton.vue')['default']
     PricingCards: typeof import('./src/components/PricingCards.vue')['default']
     Rating: typeof import('./src/components/Rating.vue')['default']

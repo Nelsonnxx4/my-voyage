@@ -197,126 +197,47 @@
             placeholder="A weekend in Monaco"
           />
 
-          <!-- <div class="space-y-2">
-            <label class="block text-textblack100 font-medium">Location</label> -->
+          <div class="space-y-2">
+            <label class="block text-textblack100 font-medium">Location</label>
 
-          <!-- <div class="flex gap-3">
-              <div class="flex-1 relative">
-                <input
-                  type="text"
-                  v-model="locationSearch"
-                  @input="searchLocation"
-                  placeholder="Search for a city or address"
-                  class="w-full p-2 border rounded focus:ring-2 focus:ring-accent50 focus:border-transparent"
-                />
+            <!-- <div class="flex-1 relative">
+              <input
+                type="text"
+                v-model="locationSearch"
+                @input="searchLocation"
+                placeholder="Search for a city or address"
+                class="w-full p-2 border rounded focus:ring-2 focus:ring-accent50 focus:border-transparent"
+              />
+            </div> -->
 
-                <div v-if="isSearching" class="absolute right-3 top-3">
-                  <Spinner />
-                </div>
-                <ul
-                  v-if="locationSuggestions.length > 0"
-                  class="absolute z-20 w-full mt-1 bg-white border rounded shadow-lg max-h-60 overflow-auto"
-                >
-                  <li
-                    v-for="suggestion in locationSuggestions"
-                    :key="suggestion.place_id || suggestion.display_name"
-                    @click="selectAndPinSuggestion(suggestion)"
-                    class="p-2 hover:bg-gray-100 cursor-pointer border-b last:border-b-0"
-                  >
-                    {{ suggestion.display_name }}
-                  </li>
-                </ul>
-              </div>
-
-              <button
-                type="button"
-                @click="useCurrentLocation"
-                class="px-3 py-2 bg-gray-100 rounded hover:bg-gray-200 transition-colors flex items-center gap-2 whitespace-nowrap"
-              >
-                <LocationIcon size="24" />
-                <span class="hidden sm:inline">My Location</span>
-              </button>
-            </div>
-            <MapView />
-
-            <div class="mt-3 p-3 bg-gray-50 rounded-lg border">
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-sm font-medium text-gray-700">
-                  Pinned Locations ({{ pins.length }}/{{ maxPinnedLocations }})
-                </span>
-                <button
-                  type="button"
-                  @click="pinSelectedLocation"
-                  :disabled="!selectedLocation || reachedPinLimit"
-                  class="px-3 py-1 text-sm bg-accent50 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-accent70 transition-colors"
-                  :title="
-                    reachedPinLimit
-                      ? 'Pin limit reached. Upgrade for more pins.'
-                      : 'Pin the selected location'
-                  "
-                >
-                  Pin This Spot
-                </button>
-              </div>
-
-              <div
-                v-if="!isPremium && reachedPinLimit"
-                class="text-xs text-orange-600 mb-2"
-              >
-                Free users can pin up to {{ maxPinnedLocations }} locations.
-                <button
-                  type="button"
-                  @click="upgradeToPremium"
-                  class="underline font-medium"
-                >
-                  Upgrade for {{ 8 - maxPinnedLocations }} more pins
-                </button>
-              </div>
-            </div>
-
-            <div v-if="pins.length" class="mt-2 border rounded p-2 bg-white">
-              <div
-                v-for="(p, i) in pins"
-                :key="i"
-                class="flex items-center justify-between py-2 border-b last:border-b-0"
-              >
-                <div class="text-sm flex-1">
-                  <p class="font-medium truncate max-w-[300px]">
-                    {{ p.display_name }}
-                  </p>
-                  <p class="text-gray-500 text-xs">
-                    {{ p.lat.toFixed(4) }}, {{ p.lon.toFixed(4) }}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  class="text-red-600 hover:underline text-sm"
-                  @click="removePinAt(i)"
-                >
-                  Remove
-                </button>
-              </div>
-            </div>
-          </div> -->
+            <MapView
+              v-model="selectedLocation"
+              map-height="400px"
+              :initial-zoom="13"
+            />
+          </div>
 
           <!-- Date range -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
             <div>
               <label class="block text-textblack100 font-medium mb-1"
-                >Date range</label
+                >Start Date</label
               >
-              <!-- <Calendar
-                v-model="dateRange"
-                selectionMode="range"
-                :minDate="minSelectableDate"
-                :maxDate="maxSelectableDate"
-                showIcon
-                inputId="dateRange"
-                class="w-full mr-2"
-                dateFormat="yy-mm-dd"
-                :manualInput="false"
-                placeholder="Select trip dates"
-              /> -->
+              <input
+                type="date"
+                v-model="formData.start_date"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent50 focus:border-transparent"
+              />
+            </div>
+            <div>
+              <label class="block text-textblack100 font-medium mb-1"
+                >End Date</label
+              >
+              <input
+                type="date"
+                v-model="formData.end_date"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent50 focus:border-transparent"
+              />
             </div>
           </div>
 
@@ -373,7 +294,7 @@
 
 <script setup lang="ts">
 // imports from vue
-import { computed, onMounted } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 // imports from PrimeVue
 import Editor from "primevue/editor";
 import Rating from "primevue/rating";
@@ -383,7 +304,7 @@ import EditVoyageSkeleton from "@/components/ui/EditVoyageSkeleton.vue";
 import ReusableButton from "@/components/ui/ReusableButton.vue";
 import ReusableInput from "@/components/ui/ReusableInput.vue";
 import Spinner from "@/components/ui/Spinner.vue";
-// import MapView from "@/components/MapView.vue";
+import MapView from "@/components/MapView.vue";
 // imports from icons
 import EditIcon from "@/assets/icons/EditIcon.vue";
 import CloseIcon from "@/assets/icons/CloseIcon.vue";
@@ -399,7 +320,7 @@ import { useImageUpload } from "@/composables/useImageUpload";
 import { usePremium } from "@/composables/usePremium";
 import { genUtils } from "@/utils/genUtils";
 // import type { LocationSuggestion } from "@/types/mapTypes";
-import { setupStorageBucket } from "@/utils/storageSetup";
+// import { setupStorageBucket } from "@/utils/storageSetup";
 
 const {
   isDetailLoading,
@@ -409,11 +330,7 @@ const {
   voyages,
 } = useVoyageManager();
 
-const {
-  isSubmitting,
-  // formatDateForInput,
-  upgradeToPremium,
-} = genUtils();
+const { isSubmitting, upgradeToPremium } = genUtils();
 
 const {
   rotate,
@@ -454,26 +371,29 @@ const {
 
 const { limits, loadUserPlan } = usePremium();
 
-// const {
-//   selectedLocation,
-//   locationSearch,
-//   locationSuggestions,
-//   isSearching,
-//   pins,
-//   searchLocation,
-//   selectSuggestion,
-//   useCurrentLocation,
-//   addPin,
-//   removePinAt,
-//   maxPinnedLocations,
-// } = useMap();
+const selectedLocation = ref<any>(null);
+
+// Watch location selection
+watch(selectedLocation, (newLocation) => {
+  if (newLocation) {
+    formData.value.location = newLocation.display_name;
+    formData.value.latitude = newLocation.lat;
+    formData.value.longitude = newLocation.lon;
+  } else {
+    formData.value.location = "";
+    formData.value.latitude = null;
+    formData.value.longitude = null;
+  }
+});
 
 onMounted(async () => {
   await loadUserPlan();
-  const isStorageReady = await setupStorageBucket();
-  if (!isStorageReady) {
-    console.warn("Storage bucket not configured");
-  }
+  // Set loading to false since create page doesn't need to load data
+  isDetailLoading.value = false;
+  // // const isStorageReady = await setupStorageBucket();
+  // if (!isStorageReady) {
+  //   console.warn("Storage bucket not configured");
+  // }
 });
 
 // Check if voyage limit reached
