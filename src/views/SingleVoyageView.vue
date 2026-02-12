@@ -1,21 +1,28 @@
 <template>
   <header
-    class="flex justify-between items-center sticky top-0 z-50 w-full bg-white border-b transition-shadow px-2 py-2"
+    class="flex justify-between items-center gap-2 sticky top-0 z-50 w-full bg-white border-b transition-shadow px-2 py-2"
     :class="{ 'shadow-md': scrolled }"
   >
-    <div class="flex items-center gap-2">
+    <div class="flex items-center">
       <router-link to="/" class="flex items-center justify-center">
         <Logo />
       </router-link>
       <div v-if="isDetailLoading">
         <USkeleton class="h-4 w-[150px] base rounded-md bg-skeleton" />
       </div>
-      <h3 v-else class="text-xl text-textblack100">
+    </div>
+
+    <div class="w-[80%] sm:w-fit">
+      <div v-if="isDetailLoading">
+        <USkeleton class="h-4 w-[150px] base rounded-md bg-skeleton" />
+      </div>
+      <h3 v-else class="text-lg flex-wrap text-textblack100">
         {{ voyage ? `Your trip to ${voyage.location}` : "Voyage Not Found" }}
       </h3>
     </div>
+
     <div
-      class="flex justify-center items-center uppercase rounded-full outline outline-accent50 hover:outline-[#6fa198] outline-offset-2 w-7 h-7 cursor-pointer"
+      class="flex justify-center items-center uppercase rounded-full outline outline-accent50 hover:outline-[#6fa198] outline-offset-2 w-7 h-6 cursor-pointer m-2"
       @click="openProfileModal"
     >
       <UTooltip :text="userData?.name">
@@ -82,8 +89,8 @@
           <!-- Image with Heart Icon -->
           <div class="relative">
             <img
-              v-if="voyage.image_urls && voyage.image_urls.length > 0"
-              :src="voyage.image_urls[0]"
+              v-if="voyageImages.length > 0"
+              :src="voyageImages[0]"
               :alt="voyage.title"
               class="w-full h-auto max-h-[400px] object-cover"
             />
@@ -156,11 +163,7 @@
         <div
           class="sticky top-6 h-[400px] sm:h-[500px] lg:h-[550px] rounded-xl overflow-hidden shadow-sm"
         >
-          <Map
-            :mapboxToken="mapboxToken"
-            :supabaseUrl="supabaseUrl"
-            :supabaseKey="supabaseKey"
-          />
+          <MapView map-height="400px" :initial-zoom="13" />
         </div>
       </div>
     </div>
@@ -207,13 +210,13 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 
 import UserModal from "@/components/UserModal.vue";
 import Rating from "@/components/Rating.vue";
 
-import Map from "@/components/Map.vue";
+import MapView from "@/components/MapView.vue";
 import ShareModal from "@/components/ShareModal.vue";
 import ReusableModal from "@/components/ui/ReusableModal.vue";
 import SingleVoyageSkeleton from "@/components/ui/SingleVoyageSkeleton.vue";
@@ -252,6 +255,21 @@ const {
 } = useVoyageManager();
 
 const { userData } = useUserProfile();
+
+// Normalize image_urls — Supabase sometimes returns it as a JSON string instead of a parsed array
+const voyageImages = computed((): string[] => {
+  const urls = voyage.value?.image_urls;
+  if (!urls) return [];
+  if (Array.isArray(urls)) return urls.filter(Boolean);
+  if (typeof urls === "string") {
+    try {
+      return JSON.parse(urls).filter(Boolean);
+    } catch {
+      return [];
+    }
+  }
+  return [];
+});
 const route = useRoute();
 
 const isShareModalOpen = ref<boolean>(false);
@@ -259,10 +277,6 @@ const isShareModalOpen = ref<boolean>(false);
 const openShareModal = () => {
   isShareModalOpen.value = true;
 };
-
-const mapboxToken = import.meta.env.VITE_MAPBOX_TOKEN;
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseKey = import.meta.env.VITE_SUPABASE_KEY;
 
 const loadVoyageData = async () => {
   const id = route.params.id as string;
