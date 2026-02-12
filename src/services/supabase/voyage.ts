@@ -202,12 +202,45 @@ export const updateVoyage = async (
   data: FormDataType
 ): Promise<VoyageTypeInfo> => {
   try {
-    const updateData = {
-      ...data,
+    const {
+      data: { session },
+      error: sessionError,
+    } = await supabase.auth.getSession();
+
+    if (sessionError) {
+      throw new Error("Authentication error: " + sessionError.message);
+    }
+
+    if (!session) {
+      throw new Error("User must be authenticated to update a voyage");
+    }
+
+    const formatDate = (d: string) =>
+      d ? new Date(d).toISOString().split("T")[0] : d;
+
+    const updateData: Record<string, any> = {
       updated_at: new Date().toISOString(),
     };
 
+    if (data.title !== undefined) updateData.title = data.title;
+    if (data.notes !== undefined) updateData.notes = data.notes;
+    if (data.location !== undefined) updateData.location = data.location;
+    if (data.latitude !== undefined) updateData.latitude = data.latitude;
+    if (data.longitude !== undefined) updateData.longitude = data.longitude;
+    if (data.start_date !== undefined)
+      updateData.start_date = formatDate(data.start_date);
+    if (data.end_date !== undefined)
+      updateData.end_date = formatDate(data.end_date);
+    if (data.rating !== undefined) updateData.rating = data.rating;
+    if (data.image_urls !== undefined) updateData.image_urls = data.image_urls;
+
     const response = await supabaseApi.patch(`/voyages`, updateData, {
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
+        apikey: import.meta.env.VITE_SUPABASE_KEY,
+        "Content-Type": "application/json",
+        Prefer: "return=representation",
+      },
       params: {
         id: `eq.${id}`,
         select: "*",
@@ -233,9 +266,28 @@ export const deleteVoyage = async (id: string): Promise<void> => {
   if (!id) return;
 
   try {
+    const {
+      data: { session },
+      error: sessionError,
+    } = await supabase.auth.getSession();
+
+    if (sessionError) {
+      throw new Error("Authentication error: " + sessionError.message);
+    }
+
+    if (!session) {
+      throw new Error("User must be authenticated to delete a voyage");
+    }
+
     await supabaseApi.delete(`/voyages`, {
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
+        apikey: import.meta.env.VITE_SUPABASE_KEY,
+        "Content-Type": "application/json",
+      },
       params: {
         id: `eq.${id}`,
+        user_id: `eq.${session.user.id}`,
       },
     });
   } catch (error: any) {
