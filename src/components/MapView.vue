@@ -126,9 +126,9 @@ const emit = defineEmits<{
   "update:modelValue": [value: LocationResult | null];
 }>();
 
-// State
+// State - Use any type to avoid Leaflet type conflicts
 const mapContainer = ref<HTMLElement | null>(null);
-const map = ref<L.Map | null>(null);
+const map = ref<any>(null);
 const marker = ref<L.Marker | null>(null);
 const searchQuery = ref("");
 const searchResults = ref<LocationResult[]>([]);
@@ -153,7 +153,7 @@ onMounted(() => {
   if (!mapContainer.value) return;
 
   // Create map centered on a default location
-  const defaultCenter: [number, number] = selectedLocation.value
+  const defaultCenter: L.LatLngExpression = selectedLocation.value
     ? [selectedLocation.value.lat, selectedLocation.value.lon]
     : [51.505, -0.09]; // London as default
 
@@ -192,9 +192,13 @@ watch(
     if (newValue && newValue !== selectedLocation.value) {
       selectedLocation.value = newValue;
       addMarker(newValue.lat, newValue.lon);
-      map.value?.setView([newValue.lat, newValue.lon], props.initialZoom);
+      // Safely check if map exists before calling setView
+      if (map.value) {
+        map.value.setView([newValue.lat, newValue.lon], props.initialZoom);
+      }
     }
-  }
+  },
+  { deep: false }
 );
 
 // Add or update marker on map
