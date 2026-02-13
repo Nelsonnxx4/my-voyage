@@ -39,7 +39,7 @@
           </div>
           <input
             type="file"
-            ref="fileInput"
+            :ref="(el) => { fileInput = el as HTMLInputElement | null }"
             @change="handleImageUpload"
             accept="image/*"
             class="hidden"
@@ -312,11 +312,15 @@ import TrashIcon from "@/assets/icons/TrashIcon.vue";
 import CropIcon from "@/assets/icons/CropIcon.vue";
 import RotateRight from "@/assets/icons/RotateRight.vue";
 import RotateLeft from "@/assets/icons/RotateLeft.vue";
+// import LocationIcon from "@/assets/icons/LocationIcon.vue";
 // imports from composables/functions/types
 import { useVoyageManager } from "@/composables/useVoyageManager";
 import { useImageUpload } from "@/composables/useImageUpload";
+// import { useMap } from "@/composables/useMap";
 import { usePremium } from "@/composables/usePremium";
 import { genUtils } from "@/utils/genUtils";
+// import type { LocationSuggestion } from "@/types/mapTypes";
+// import { setupStorageBucket } from "@/utils/storageSetup";
 
 const {
   isDetailLoading,
@@ -350,7 +354,7 @@ const {
   // cropBox,
   croppedImage,
   dragOver,
-  // fileInput,
+  fileInput,
   isImgLoading,
   hasImage,
   showActionButtons,
@@ -372,8 +376,7 @@ const selectedLocation = ref<any>(null);
 // Watch location selection
 watch(selectedLocation, (newLocation) => {
   if (newLocation) {
-    formData.value.location =
-      newLocation.short_name ?? newLocation.display_name;
+    formData.value.location = newLocation.display_name;
     formData.value.latitude = newLocation.lat;
     formData.value.longitude = newLocation.lon;
   } else {

@@ -53,12 +53,16 @@
           :class="getButtonClass(plan)"
           class="mt-8 block w-full py-3 px-6 border rounded-md text-center font-medium transition-all duration-200"
         >
+          <span
+            v-if="isLoadingPlan(plan)"
+            class="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"
+          ></span>
           {{ getButtonText(plan) }}
         </button>
 
-        <!-- No Button for Free Plan when user is Free -->
+        <!-- "You're on this plan" for free users on Free plan -->
         <div
-          v-else-if="plan.name === 'Free/Basic' && !isPremiumUser"
+          v-else-if="plan.name === 'Free/Basic' && !isPremium"
           class="mt-8 block w-full py-3 px-6 text-center text-normal text-accent100 italic"
         >
           You're on this plan
@@ -96,16 +100,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useAuth } from "@/composables/useAuth";
 import { usePremium } from "@/composables/usePremium";
 import { fetchSubscriptionPlans } from "@/services/fetchSubscriptionPlans";
-
 import type { Plan } from "@/types/plans";
 
 const router = useRouter();
-const { upgradeUser, checkStatus } = usePremium();
+// ✅ isPremium and limits are now reactive computed refs
+const { upgradeUser, checkStatus, isPremium } = usePremium();
 const { user } = useAuth();
 
 const plans = ref<Plan[]>([]);
@@ -113,42 +117,25 @@ const loadingPlans = ref(true);
 const errorPlans = ref<string | null>(null);
 const loadingPlan = ref<string | null>(null);
 const showSuccess = ref(false);
-const isPremiumUser = ref(false);
 
-const isScrolled = ref(false);
+// ✅ Derived from reactive computed ref
+const isPremiumUser = computed(() => isPremium.value);
 
-const handleScroll = () => {
-  isScrolled.value = window.scrollY > 10;
-};
-
-onMounted(() => {
-  window.addEventListener("scroll", handleScroll);
-});
-
-onUnmounted(() => {
-  window.removeEventListener("scroll", handleScroll);
-});
-// Load plans and check premium status
 const loadPlans = async () => {
   try {
     loadingPlans.value = true;
     errorPlans.value = null;
-
     const products = await fetchSubscriptionPlans();
     plans.value = products;
 
-    // Check if user is premium
     if (user.value) {
       await checkStatus();
-      isPremiumUser.value = user.value.is_premium || false;
     }
   } catch (err: unknown) {
-    if (err && typeof err === "object" && "message" in err) {
-      errorPlans.value = (err as { message: string }).message;
-    } else {
-      errorPlans.value = "Failed to load plans";
-    }
-    console.error("Error loading plans:", err);
+    errorPlans.value =
+      err && typeof err === "object" && "message" in err
+        ? (err as { message: string }).message
+        : "Failed to load plans";
   } finally {
     loadingPlans.value = false;
   }
@@ -156,7 +143,6 @@ const loadPlans = async () => {
 
 onMounted(async () => {
   await loadPlans();
-
   if (router.currentRoute.value.query.success) {
     showSuccess.value = true;
     setTimeout(() => (showSuccess.value = false), 5000);
@@ -165,81 +151,41 @@ onMounted(async () => {
 
 const isCurrentPlan = (plan: Plan): boolean => {
   if (!user.value) return false;
-
-  if (plan.name === "Free/Basic" && !isPremiumUser.value) {
-    return true;
-  }
-
-  if (plan.name === "premium" && isPremiumUser.value) {
-    return true;
-  }
-
+  if (plan.name === "Free/Basic" && !isPremiumUser.value) return true;
+  if (plan.name !== "Free/Basic" && isPremiumUser.value) return true;
   return false;
 };
 
 const shouldShowButton = (plan: Plan): boolean => {
-  if (plan.name === "Free/Basic" && !isPremiumUser.value) {
-    return false;
-  }
-
+  if (plan.name === "Free/Basic" && !isPremiumUser.value) return false;
   return true;
 };
 
-// Check if plan is currently loading
-const isLoadingPlan = (plan: Plan): boolean => {
-  return loadingPlan.value === plan.id;
-};
+const isLoadingPlan = (plan: Plan): boolean => loadingPlan.value === plan.id;
 
-// Get button class based on plan state
 const getButtonClass = (plan: Plan): string => {
-  if (isCurrentPlan(plan)) {
+  if (isCurrentPlan(plan))
     return "bg-gray-100 text-gray-500 cursor-not-allowed border-gray-300";
-  }
-
-  if (isLoadingPlan(plan)) {
+  if (isLoadingPlan(plan))
     return "bg-gray-200 text-gray-600 cursor-wait border-gray-300";
-  }
-
-  if (plan.featured) {
+  if (plan.featured)
     return "bg-accent100 text-white hover:bg-accent200 border-accent100 shadow-lg hover:shadow-xl";
-  }
-
   return "bg-white text-gray-800 hover:bg-gray-50 border-gray-300 hover:border-accent100";
 };
 
 const getButtonText = (plan: Plan): string => {
-  if (isCurrentPlan(plan)) {
-    return "Current Plan";
-  }
-
-  if (isLoadingPlan(plan)) {
-    return "Processing...";
-  }
-
-  if (plan.name === "Free/Basic") {
-    if (isPremiumUser.value) {
-      return "Downgrade to Free";
-    }
-    return "Continue with Free";
-  }
-
-  if (isPremiumUser.value && plan.name !== "Free/Basic") {
+  if (isCurrentPlan(plan)) return "Current Plan";
+  if (isLoadingPlan(plan)) return "Processing...";
+  if (plan.name === "Free/Basic")
+    return isPremiumUser.value ? "Downgrade to Free" : "Continue with Free";
+  if (isPremiumUser.value && plan.name !== "Free/Basic")
     return "Manage Subscription";
-  }
-
   return "Upgrade Now";
 };
 
-// Get border class based on plan status
 const getPlanBorderClass = (plan: Plan): string => {
-  if (isCurrentPlan(plan)) {
-    return "border-green-500 ring-2 ring-green-200";
-  }
-
-  if (plan.featured) {
-    return "border-accent100";
-  }
-
+  if (isCurrentPlan(plan)) return "border-green-500 ring-2 ring-green-200";
+  if (plan.featured) return "border-accent100";
   return "border-gray-200";
 };
 
@@ -255,13 +201,14 @@ const handlePlanSelection = async (plan: Plan) => {
         "Are you sure you want to downgrade to the Free plan? You'll lose access to premium features at the end of your billing period."
       );
       if (confirmed) {
-        router.push("/voyages");
+        // Open billing portal to cancel
+        const { manageBilling } = usePremium();
+        await manageBilling();
       }
     }
     return;
   }
 
-  // Ensure user is authenticated
   if (!user.value) {
     router.push("/login");
     return;
@@ -269,22 +216,8 @@ const handlePlanSelection = async (plan: Plan) => {
 
   try {
     loadingPlan.value = plan.id;
-
-    if (!plan.prices[0].id) {
-      throw new Error("Price ID not configured for this plan");
-    }
-
+    // upgradeUser redirects to Stripe Checkout — no return value needed
     await upgradeUser(plan.prices[0].id);
-
-    if (user.value) {
-      user.value.is_premium = true;
-      isPremiumUser.value = true;
-    }
-
-    showSuccess.value = true;
-    setTimeout(() => {
-      showSuccess.value = false;
-    }, 5000);
   } catch (error) {
     console.error("Subscription error:", error);
     alert("There was an error processing your subscription. Please try again.");

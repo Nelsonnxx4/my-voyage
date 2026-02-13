@@ -75,6 +75,7 @@ serve(async (req) => {
         status: subscription?.status || "inactive",
         current_period_end: subscription?.current_period_end,
         price_id: subscription?.price_id,
+        cancel_at_period_end: subscription.cancel_at_period_end,
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },

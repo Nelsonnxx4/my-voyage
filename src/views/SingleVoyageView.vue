@@ -163,7 +163,13 @@
         <div
           class="sticky top-6 h-[400px] sm:h-[500px] lg:h-[550px] rounded-xl overflow-hidden shadow-sm"
         >
-          <MapView map-height="400px" :initial-zoom="13" />
+          <MapView
+            v-if="voyageLocation"
+            :model-value="voyageLocation"
+            map-height="400px"
+            :initial-zoom="13"
+            :readonly="true"
+          />
         </div>
       </div>
     </div>
@@ -255,6 +261,17 @@ const {
 } = useVoyageManager();
 
 const { userData } = useUserProfile();
+
+const voyageLocation = computed(() => {
+  if (!voyage.value?.latitude || !voyage.value?.longitude) return null;
+  return {
+    place_id: `${voyage.value.latitude}-${voyage.value.longitude}`,
+    display_name: voyage.value.location ?? "",
+    short_name: voyage.value.location ?? "",
+    lat: voyage.value.latitude,
+    lon: voyage.value.longitude,
+  };
+});
 
 // Normalize image_urls — Supabase sometimes returns it as a JSON string instead of a parsed array
 const voyageImages = computed((): string[] => {
