@@ -149,5 +149,6 @@ export const usePremium = (userId?: string): PremiumFeatures => {
     upgradeUser,
     manageBilling,
     loadUserPlan,
+    setPremiumPlan,
   };
 };
