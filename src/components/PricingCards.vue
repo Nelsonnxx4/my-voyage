@@ -119,7 +119,7 @@ const loadingPlan = ref<string | null>(null);
 const showSuccess = ref(false);
 
 // ✅ Derived from reactive computed ref
-const isPremiumUser = computed(() => isPremium.value);
+const isPremiumUser = computed(() => isPremium);
 
 const loadPlans = async () => {
   try {

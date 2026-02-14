@@ -31,7 +31,7 @@ interface ImageActions {
   startResize: (e: MouseEvent, handle: string) => void;
   deleteSelectedImage: () => void;
   uploadImagesToSupabase: () => Promise<string[]>;
-  isPremium: ComputedRef<boolean>;
+  isPremium: boolean;
   maxImagesPerEntry: ComputedRef<number>;
   hasImage: ComputedRef<boolean>;
   showActionButtons: ComputedRef<boolean | string>;
@@ -50,7 +50,6 @@ interface ImageActions {
 }
 
 export const useImageUpload = (formData: Ref<FormDataType>): ImageActions => {
-  // ✅ Destructure computed refs — NOT .value snapshots
   const { limits, isPremium, loadUserPlan } = usePremium();
 
   loadUserPlan();
@@ -77,7 +76,7 @@ export const useImageUpload = (formData: Ref<FormDataType>): ImageActions => {
   const tempImages = ref<{ base64: string; file: File | null }[]>([]);
 
   // ✅ maxImagesPerEntry is now computed from reactive limits
-  const maxImagesPerEntry = computed(() => limits.value.maxImagesPerEntry);
+  const maxImagesPerEntry = computed(() => limits.maxImagesPerEntry);
 
   const canAddMoreImages = computed(() => {
     return formData.value.image_urls.length < maxImagesPerEntry.value;
@@ -113,8 +112,7 @@ export const useImageUpload = (formData: Ref<FormDataType>): ImageActions => {
     );
     if (imageFiles.length === 0) return;
 
-    // ✅ Use isPremium.value (reactive computed ref)
-    const filesToProcess = isPremium.value ? imageFiles : [imageFiles[0]];
+    const filesToProcess = isPremium ? imageFiles : [imageFiles[0]];
     const totalAfterAdd =
       formData.value.image_urls.length + filesToProcess.length;
 
@@ -134,8 +132,7 @@ export const useImageUpload = (formData: Ref<FormDataType>): ImageActions => {
     if (isImgLoading.value || isUploading.value) return;
 
     const files = Array.from(input);
-    // ✅ Use isPremium.value (reactive computed ref)
-    const filesToProcess = isPremium.value ? files : [files[0]];
+    const filesToProcess = isPremium ? files : [files[0]];
 
     const totalAfterAdd =
       formData.value.image_urls.length + filesToProcess.length;

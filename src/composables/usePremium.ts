@@ -24,6 +24,7 @@ export interface PremiumFeatures {
   upgradeUser: (priceId: string) => Promise<void>;
   loadUserPlan: () => Promise<void>;
   manageBilling: () => Promise<void>;
+  setPremiumPlan: () => void;
 }
 
 export const usePremium = (userId?: string): PremiumFeatures => {
