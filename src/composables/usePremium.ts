@@ -1,4 +1,4 @@
-import { ref, computed } from "vue";
+import { ref } from "vue";
 import { supabase } from "@/config/supabase";
 import {
   checkPremiumStatus,
@@ -15,132 +15,138 @@ export interface PlanLimits {
   isPremium: boolean;
 }
 
-// ─── Module-level shared state so all callers share the same reactive refs ───
-const userPlan = ref<PlanLimits>({
-  maxImagesPerEntry: 1,
-  maxVoyageEntries: 10,
-  maxPinnedLocations: 2,
-  canExportPdf: false,
-  canShareSocial: true,
-  isPremium: false,
-});
+export interface PremiumFeatures {
+  isPremium: boolean;
+  loading: boolean;
+  error: Error | null;
+  limits: PlanLimits;
+  checkStatus: () => Promise<void>;
+  upgradeUser: (priceId: string) => Promise<void>;
+  loadUserPlan: () => Promise<void>;
+  manageBilling: () => Promise<void>;
+}
 
-const loading = ref(false);
-const error = ref<Error | null>(null);
-const planLoaded = ref(false);
-
-const setPremiumPlan = () => {
-  userPlan.value = {
-    maxImagesPerEntry: 8,
-    maxVoyageEntries: 50,
-    maxPinnedLocations: 8,
-    canExportPdf: true,
-    canShareSocial: true,
-    isPremium: true,
-  };
-};
-
-const setFreePlan = () => {
-  userPlan.value = {
+export const usePremium = (userId?: string): PremiumFeatures => {
+  const userPlan = ref<PlanLimits>({
     maxImagesPerEntry: 1,
     maxVoyageEntries: 10,
     maxPinnedLocations: 2,
     canExportPdf: false,
     canShareSocial: true,
     isPremium: false,
-  };
-};
+  });
 
-const getCurrentUserId = async (userId?: string): Promise<string> => {
-  if (userId) return userId;
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) throw new Error("No user authenticated");
-  return user.id;
-};
+  const loading = ref(false);
+  const error = ref<Error | null>(null);
 
-const loadUserPlan = async (userId?: string) => {
-  // Skip if already loaded and not forcing a refresh
-  if (planLoaded.value && !userId) return;
+  const getCurrentUserId = async (): Promise<string> => {
+    if (userId) return userId;
 
-  loading.value = true;
-  error.value = null;
-
-  try {
-    const currentUserId = await getCurrentUserId(userId);
-    const isUserPremium = await checkPremiumStatus(currentUserId);
-
-    if (isUserPremium) {
-      setPremiumPlan();
-    } else {
-      setFreePlan();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      throw new Error("No user authenticated");
     }
+    return user.id;
+  };
 
-    planLoaded.value = true;
-  } catch (err) {
-    error.value = err as Error;
-    console.error("Error loading user plan:", err);
-    setFreePlan();
-  } finally {
-    loading.value = false;
-  }
-};
+  const setPremiumPlan = () => {
+    userPlan.value = {
+      maxImagesPerEntry: 8,
+      maxVoyageEntries: 50,
+      maxPinnedLocations: 8,
+      canExportPdf: true,
+      canShareSocial: true,
+      isPremium: true,
+    };
+  };
 
-const checkStatus = async (userId?: string) => {
-  // Force a fresh check (ignore planLoaded cache)
-  planLoaded.value = false;
-  await loadUserPlan(userId);
-};
+  const setFreePlan = () => {
+    userPlan.value = {
+      maxImagesPerEntry: 1,
+      maxVoyageEntries: 10,
+      maxPinnedLocations: 2,
+      canExportPdf: false,
+      canShareSocial: true,
+      isPremium: false,
+    };
+  };
 
-const upgradeUser = async (priceId: string) => {
-  loading.value = true;
-  error.value = null;
+  const loadUserPlan = async () => {
+    loading.value = true;
+    error.value = null;
 
-  try {
-    await initiatePremiumCheckout(priceId);
-  } catch (err) {
-    error.value = err as Error;
-    console.error("Error initiating premium checkout", err);
-    throw err;
-  } finally {
-    loading.value = false;
-  }
-};
+    try {
+      const currentUserId = await getCurrentUserId();
+      const isUserPremium = await checkPremiumStatus(currentUserId);
 
-const manageBilling = async () => {
-  loading.value = true;
-  error.value = null;
+      if (isUserPremium) {
+        setPremiumPlan();
+      } else {
+        setFreePlan();
+      }
+    } catch (err) {
+      error.value = err as Error;
+      console.error("Error loading user plan:", err);
+      setFreePlan();
+    } finally {
+      loading.value = false;
+    }
+  };
 
-  try {
-    await manageSubscription();
-  } catch (err) {
-    error.value = err as Error;
-    console.error("Error managing subscription:", err);
-    throw err;
-  } finally {
-    loading.value = false;
-  }
-};
+  const checkStatus = async () => {
+    await loadUserPlan();
+  };
 
-// ─── Exported composable ─────────────────────────────────────────────────────
-export const usePremium = (userId?: string) => {
-  // Reactive computed refs — NOT unwrapped .value snapshots
-  const limits = computed(() => userPlan.value);
-  const isPremium = computed(() => userPlan.value.isPremium);
+  const upgradeUser = async (priceId: string) => {
+    loading.value = true;
+    error.value = null;
 
+    try {
+      await initiatePremiumCheckout(priceId);
+    } catch (err) {
+      error.value = err as Error;
+      console.error("Error initiating premium checkout", err);
+      throw err;
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  const manageBilling = async () => {
+    loading.value = true;
+    error.value = null;
+
+    try {
+      await manageSubscription();
+    } catch (err) {
+      error.value = err as Error;
+      console.error("Error managing subscription:", err);
+      throw err;
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  // Return plain getters so `limits` satisfies `PlanLimits` (not ComputedRef<PlanLimits>).
+  // Callers use: limits.maxVoyageEntries, limits.canExportPdf directly.
   return {
-    // Return computed refs so callers stay reactive
-    isPremium,
-    limits,
-    loading: computed(() => loading.value),
-    error: computed(() => error.value),
-    checkStatus: () => checkStatus(userId),
+    get isPremium() {
+      return userPlan.value.isPremium;
+    },
+    get loading() {
+      return loading.value;
+    },
+    get error() {
+      return error.value;
+    },
+    get limits() {
+      return userPlan.value;
+    },
+    checkStatus,
     upgradeUser,
     manageBilling,
-    loadUserPlan: () => loadUserPlan(userId),
-    // Expose raw setters for post-payment optimistic updates
-    setPremiumPlan,
-    setFreePlan,
+    loadUserPlan,
   };
 };
