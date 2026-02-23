@@ -1,7 +1,7 @@
 <template>
   <div class="bg-gray-50">
     <Header />
-    <div class="max-w-7xl mx-auto pt-6 px-4 mt-12 sm:px-4 lg:px-6">
+    <div class="mx-auto pt-6 px-4 mt-12 sm:px-4 lg:px-6">
       <div class="text-center mt-4 mb-12">
         <h1
           class="text-3xl font-semibold text-gray-900 sm:text-5xl sm:tracking-tight lg:text-6xl"
@@ -43,10 +43,7 @@
         </button>
       </div>
 
-      <div
-        v-else
-        class="mt-16 space-y-8 lg:space-y-0 lg:grid lg:grid-cols-3 lg:gap-x-8"
-      >
+      <div v-else class="mt-16 space-y-8">
         <PricingCards />
       </div>
 

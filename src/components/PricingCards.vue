@@ -1,15 +1,15 @@
 <template>
-  <div class="flex flex-wrap gap-8 justify-center">
+  <div class="flex justify-center items-center gap-8">
     <div
       v-for="plan in plans"
       :key="plan.id"
-      class="w-[95%] md:w-[60%] lg:w-[40%] xl:w-[30%] md:min-h-[560px] relative bg-white border-2 rounded-2xl shadow-sm divide-y divide-gray-200 transition-all duration-300 hover:shadow-lg"
+      class="w-[95%] md:w-[60%] lg:w-[40%] xl:w-[25%] md:min-h-[560px] relative bg-white border-2 rounded-2xl shadow-sm divide-y divide-gray-200 transition-all duration-300 hover:shadow-lg"
       :class="getPlanBorderClass(plan)"
     >
       <!-- Current Plan Badge -->
       <div
         v-if="isCurrentPlan(plan)"
-        class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-1 text-xs font-bold rounded-full uppercase tracking-wide shadow-md"
+        class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-accent50 text-white px-4 py-1 text-xs font-bold rounded-full uppercase tracking-wide shadow-md"
       >
         Current Plan
       </div>
@@ -184,7 +184,7 @@ const getButtonText = (plan: Plan): string => {
 };
 
 const getPlanBorderClass = (plan: Plan): string => {
-  if (isCurrentPlan(plan)) return "border-green-500 ring-2 ring-green-200";
+  if (isCurrentPlan(plan)) return "";
   if (plan.featured) return "border-accent100";
   return "border-gray-200";
 };

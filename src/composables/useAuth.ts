@@ -9,14 +9,15 @@ import {
 import { getCurrentUser, getUserProfile } from "@/services/supabase/profile";
 import type { UserProfile } from "@/types/user";
 
+const user = ref<UserProfile | null>(null);
+const loading = ref<boolean>(false);
+const error = ref<string | null>(null);
+
 export const useAuth = () => {
   const router = useRouter();
-  const user = ref<UserProfile | null>(null);
-  const loading = ref<boolean>(false);
   const name = ref<string>("");
   const email = ref<string>("");
   const password = ref<string>("");
-  const error = ref<string | null>(null);
 
   const checkAuth = async () => {
     loading.value = true;
