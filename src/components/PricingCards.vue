@@ -1,9 +1,11 @@
 <template>
-  <div class="flex justify-center items-center gap-8">
+  <div
+    class="flex flex-col md:flex-row md:flex-wrap justify-center items-center gap-8"
+  >
     <div
       v-for="plan in plans"
       :key="plan.id"
-      class="w-[95%] md:w-[60%] lg:w-[40%] xl:w-[25%] md:min-h-[560px] relative bg-white border-2 rounded-2xl shadow-sm divide-y divide-gray-200 transition-all duration-300 hover:shadow-lg"
+      class="w-full sm:w-[80%] md:w-[45%] lg:w-[40%] xl:w-[25%] md:min-h-[560px] relative bg-white border-2 rounded-2xl shadow-sm divide-y divide-gray-200 transition-all duration-300 hover:shadow-lg"
       :class="getPlanBorderClass(plan)"
     >
       <!-- Current Plan Badge -->
@@ -108,7 +110,7 @@ import { fetchSubscriptionPlans } from "@/services/fetchSubscriptionPlans";
 import type { Plan } from "@/types/plans";
 
 const router = useRouter();
-// ✅ isPremium and limits are now reactive computed refs
+
 const { upgradeUser, checkStatus, isPremium } = usePremium();
 const { user } = useAuth();
 
@@ -118,7 +120,6 @@ const errorPlans = ref<string | null>(null);
 const loadingPlan = ref<string | null>(null);
 const showSuccess = ref(false);
 
-// ✅ Derived from reactive computed ref
 const isPremiumUser = computed(() => isPremium);
 
 const loadPlans = async () => {

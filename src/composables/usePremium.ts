@@ -130,20 +130,14 @@ export const usePremium = (userId?: string): PremiumFeatures => {
     }
   };
 
-  // Return plain getters so `limits` satisfies `PlanLimits` (not ComputedRef<PlanLimits>).
-  // Callers use: limits.maxVoyageEntries, limits.canExportPdf directly.
   return {
-    get isPremium() {
-      return userPlan.value.isPremium;
-    },
+    isPremium: userPlan.value.isPremium,
+    limits: userPlan.value,
     get loading() {
       return loading.value;
     },
     get error() {
       return error.value;
-    },
-    get limits() {
-      return userPlan.value;
     },
     checkStatus,
     upgradeUser,
