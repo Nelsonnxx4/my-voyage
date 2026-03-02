@@ -21,20 +21,12 @@
           v-for="(item, index) in NavPaths"
           :key="index"
           :href="item.href"
-          class="text-[16px] text-accent100 hover:text-accent50 font-medium transition-colors duration-200 md:mr-2 lg:mr-3"
-          @click.prevent="scrollToSection(item.href)"
+          class="text-[16px] text-accent100 hover:text-accent50 font-medium transition-colors duration-200 md:mr-2 lg:mr-3 cursor-pointer hover:underline"
+          @click.prevent="handleScrollToSection(item.href)"
         >
           <a>
             {{ item.name }}
           </a>
-        </li>
-        <li>
-          <router-link
-            to="/about"
-            class="text-[16px] text-accent100 hover:text-accent50 font-medium transition-colors duration-200 md:mr-2 lg:mr-3"
-          >
-            About
-          </router-link>
         </li>
       </ul>
     </nav>
@@ -82,6 +74,7 @@ import SideSlider from "@/components/SideSlider.vue";
 import { NavPaths } from "@/constants/constant";
 import { useAuth } from "@/composables/useAuth";
 import { ref, onMounted, onUnmounted } from "vue";
+import { scrollToSection } from "@/utils/scrollToSection";
 
 const headerRef = ref(null);
 const isScrolled = ref(false);
@@ -111,19 +104,11 @@ const openMenu = () => {
 const closeMenu = () => {
   isMenuOpen.value = false;
 };
-const scrollToSection = (href: string | undefined) => {
+
+const handleScrollToSection = (href: string | undefined) => {
   isMenuOpen.value = false;
 
-  const sectionId: string | undefined = href?.replace("#", "");
-  if (!sectionId) return;
-  const section = document.getElementById(sectionId);
-
-  if (section) {
-    section.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    });
-  }
+  scrollToSection(href);
 };
 </script>
 

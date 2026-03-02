@@ -1,4 +1,3 @@
-// date-and-timeUtils.ts
 import { formatDistanceToNow, formatDistance, isFuture } from "date-fns";
 import type { UserProfile } from "@/types/user";
 

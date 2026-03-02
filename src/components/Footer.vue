@@ -6,37 +6,16 @@
         <h4 class="text-inputColor200 font-medium">Zende</h4>
       </div>
       <ul>
-        <li>
-          <router-link
-            to="/signup"
-            class="text-sm text-white/75 hover:text-white/65 underline"
-          >
-            Get Started
-          </router-link>
-        </li>
-        <li>
-          <router-link
-            to="/signup"
-            class="text-sm text-white/75 hover:text-white/65 underline"
-          >
-            About
-          </router-link>
-        </li>
-        <li>
-          <router-link
-            to="/signup"
-            class="text-sm text-white/75 hover:text-white/65 underline"
-          >
-            Pricing
-          </router-link>
-        </li>
-        <li>
-          <router-link
-            to="/signup"
-            class="text-sm text-white/75 hover:text-white/65 underline"
-          >
-            FAQs
-          </router-link>
+        <li
+          v-for="(item, index) in NavPaths"
+          :key="index"
+          :href="item.href"
+          class="text-[16px] text-accent200 hover:text-accent100 underline font-medium transition-colors duration-200 md:mr-2 lg:mr-3 cursor-pointer"
+          @click.prevent="handleScrollToSection(item.href)"
+        >
+          <a>
+            {{ item.name }}
+          </a>
         </li>
       </ul>
     </main>
@@ -45,8 +24,14 @@
 
 <script setup lang="ts">
 import Logo from "@/assets/icons/Logo.vue";
+import { NavPaths } from "@/constants/constant";
+import { scrollToSection } from "@/utils/scrollToSection";
 
 defineOptions({
   name: "AppFooter",
 });
+
+const handleScrollToSection = (href: string | undefined) => {
+  scrollToSection(href);
+};
 </script>

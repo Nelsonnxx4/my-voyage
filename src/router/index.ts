@@ -10,12 +10,7 @@ const routes: AppRouteRecordRaw[] = [
     component: HomeView,
     // meta: { guestOnly: true },
   },
-  {
-    path: "/about",
-    name: "aout",
-    component: () => import("@/views/AboutView.vue"),
-    // meta: { guestOnly: true },
-  },
+ 
   {
     path: "/login",
     name: "login",
