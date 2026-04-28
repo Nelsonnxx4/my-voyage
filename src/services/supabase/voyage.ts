@@ -42,7 +42,7 @@ export const fetchVoyages = async (): Promise<VoyageTypeInfo[]> => {
     const response = await supabaseApi.get("/voyages", {
       headers: {
         Authorization: `Bearer ${session.access_token}`,
-        apiKey: import.meta.env.VITE_SUPABASE_KEY,
+        apiKey: import.meta.env.VITE_SUPABASE_ANON_KEY,
         "Content-Type": "application/json",
       },
       params: {

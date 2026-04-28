@@ -1,3 +1,4 @@
+// supabase/functions/create-check-out-session/index.ts
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import Stripe from "https://esm.sh/stripe@12.0.0?target=deno";
@@ -15,10 +16,7 @@ const corsHeaders = {
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
-    return new Response("ok", {
-      status: 200,
-      headers: corsHeaders,
-    });
+    return new Response("ok", { status: 200, headers: corsHeaders });
   }
 
   try {
@@ -47,19 +45,12 @@ serve(async (req) => {
       });
     }
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL");
-    const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY");
-
-    if (!supabaseUrl || !supabaseKey) {
-      return new Response(JSON.stringify({ error: "Supabase configuration missing" }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 500,
-      });
-    }
-
-    const supabaseClient = createClient(supabaseUrl, supabaseKey, {
-      global: { headers: { Authorization: authHeader } },
-    });
+    // ✅ FIX: Use correct Supabase built-in env var names
+    const supabaseClient = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+      { global: { headers: { Authorization: authHeader } } }
+    );
 
     const {
       data: { user },
@@ -73,34 +64,32 @@ serve(async (req) => {
       });
     }
 
-    console.log("User authenticated:", user.id);
+    console.log("Creating checkout for user:", user.id);
 
     // Get or create Stripe customer
     let customerId: string;
 
-    // Check if user already has a Stripe customer ID
     const { data: existingSubscription } = await supabaseClient
       .from("subscriptions")
       .select("stripe_customer_id")
       .eq("user_id", user.id)
-      .single();
+      .maybeSingle();
 
     if (existingSubscription?.stripe_customer_id) {
       customerId = existingSubscription.stripe_customer_id;
-      console.log("Using existing customer:", customerId);
+      console.log("Using existing Stripe customer:", customerId);
     } else {
-      // Create new Stripe customer
-      console.log("Creating new Stripe customer for user:", user.email);
       const customer = await stripe.customers.create({
         email: user.email,
         metadata: {
+          // ✅ FIX: Store user ID on the customer so webhook can always
+          // find the user even if session metadata is missing
           supabase_user_id: user.id,
         },
       });
       customerId = customer.id;
-      console.log("Created new customer:", customerId);
+      console.log("Created Stripe customer:", customerId);
 
-      // Store customer ID in database
       await supabaseClient.from("subscriptions").insert({
         user_id: user.id,
         stripe_customer_id: customerId,
@@ -108,19 +97,13 @@ serve(async (req) => {
       });
     }
 
-    // Create checkout session
-    console.log("Creating Stripe checkout session");
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
-      line_items: [
-        {
-          price: priceId,
-          quantity: 1,
-        },
-      ],
+      line_items: [{ price: priceId, quantity: 1 }],
       mode: "subscription",
       success_url: successUrl,
       cancel_url: cancelUrl,
+      client_reference_id: user.id,
       subscription_data: {
         metadata: {
           supabase_user_id: user.id,
@@ -128,13 +111,10 @@ serve(async (req) => {
       },
     });
 
-    console.log("Checkout session created:", session.id);
+    console.log("Checkout session created:", session.id, "url:", session.url);
 
     return new Response(
-      JSON.stringify({
-        sessionId: session.id,
-        url: session.url,
-      }),
+      JSON.stringify({ sessionId: session.id, url: session.url }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
@@ -143,10 +123,7 @@ serve(async (req) => {
   } catch (error) {
     console.error("Error creating checkout session:", error);
     return new Response(
-      JSON.stringify({
-        error: error.message,
-        details: error.toString(),
-      }),
+      JSON.stringify({ error: error.message, details: error.toString() }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 400,

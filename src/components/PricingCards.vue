@@ -3,7 +3,7 @@
     class="flex flex-col md:flex-row md:flex-wrap justify-center items-center gap-8"
   >
     <div
-      v-for="plan in plans"
+      v-for="plan in allPlans"
       :key="plan.id"
       class="w-full sm:w-[80%] md:w-[45%] lg:w-[40%] xl:w-[25%] md:min-h-[560px] relative bg-white border-2 rounded-2xl shadow-sm divide-y divide-gray-200 transition-all duration-300 hover:shadow-lg"
       :class="getPlanBorderClass(plan)"
@@ -35,14 +35,14 @@
             ${{
               Array.isArray(plan.prices) && plan.prices[0]
                 ? plan.prices[0].amount
-                : ""
+                : "0"
             }}
           </span>
           <span class="text-base font-medium text-gray-500">
             /{{
               Array.isArray(plan.prices) && plan.prices[0]?.interval
                 ? plan.prices[0].interval
-                : "one-time"
+                : "forever"
             }}
           </span>
         </div>
@@ -57,14 +57,14 @@
         >
           <span
             v-if="isLoadingPlan(plan)"
-            class="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"
+            class="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2"
           ></span>
           {{ getButtonText(plan) }}
         </button>
 
         <!-- "You're on this plan" for free users on Free plan -->
         <div
-          v-else-if="plan.name === 'Free/Basic' && !isPremium"
+          v-else
           class="mt-8 block w-full py-3 px-6 text-center text-normal text-accent100 italic"
         >
           You're on this plan
@@ -110,27 +110,29 @@ import { fetchSubscriptionPlans } from "@/services/fetchSubscriptionPlans";
 import type { Plan } from "@/types/plans";
 
 const router = useRouter();
-
-const { upgradeUser, checkStatus, isPremium } = usePremium();
+const premium = usePremium();
 const { user } = useAuth();
 
-const plans = ref<Plan[]>([]);
+const stripePlans = ref<Plan[]>([]);
 const loadingPlans = ref(true);
 const errorPlans = ref<string | null>(null);
 const loadingPlan = ref<string | null>(null);
-const showSuccess = ref(false);
 
-const isPremiumUser = computed(() => isPremium);
+
+
+const isPremiumUser = computed(() => premium.isPremium);
+
+const allPlans = computed<Plan[]>(() => [...stripePlans.value]);
 
 const loadPlans = async () => {
   try {
     loadingPlans.value = true;
     errorPlans.value = null;
     const products = await fetchSubscriptionPlans();
-    plans.value = products;
+    stripePlans.value = products;
 
     if (user.value) {
-      await checkStatus();
+      await premium.checkStatus();
     }
   } catch (err: unknown) {
     errorPlans.value =
@@ -145,28 +147,29 @@ const loadPlans = async () => {
 onMounted(async () => {
   await loadPlans();
   if (router.currentRoute.value.query.success) {
-    showSuccess.value = true;
-    setTimeout(() => (showSuccess.value = false), 5000);
+    // Re-check premium status after returning from Stripe
+    await premium.checkStatus();
   }
 });
 
 const isCurrentPlan = (plan: Plan): boolean => {
   if (!user.value) return false;
-  if (plan.name === "Free/Basic" && !isPremiumUser.value) return true;
-  if (plan.name !== "Free/Basic" && isPremiumUser.value) return true;
+  if (plan.id === "free" && !isPremiumUser.value) return true;
+  if (plan.id !== "free" && isPremiumUser.value) return true;
   return false;
 };
 
 const shouldShowButton = (plan: Plan): boolean => {
-  if (plan.name === "Free/Basic" && !isPremiumUser.value) return false;
+  // Hide button on free plan if user is free (show "You're on this plan" text instead)
+  if (plan.id === "free" && !isPremiumUser.value) return false;
+  // Hide button if this is the current paid plan
+  if (isCurrentPlan(plan)) return false;
   return true;
 };
 
 const isLoadingPlan = (plan: Plan): boolean => loadingPlan.value === plan.id;
 
 const getButtonClass = (plan: Plan): string => {
-  if (isCurrentPlan(plan))
-    return "bg-gray-100 text-gray-500 cursor-not-allowed border-gray-300";
   if (isLoadingPlan(plan))
     return "bg-gray-200 text-gray-600 cursor-wait border-gray-300";
   if (plan.featured)
@@ -175,50 +178,53 @@ const getButtonClass = (plan: Plan): string => {
 };
 
 const getButtonText = (plan: Plan): string => {
-  if (isCurrentPlan(plan)) return "Current Plan";
   if (isLoadingPlan(plan)) return "Processing...";
-  if (plan.name === "Free/Basic")
-    return isPremiumUser.value ? "Downgrade to Free" : "Continue with Free";
-  if (isPremiumUser.value && plan.name !== "Free/Basic")
-    return "Manage Subscription";
+  if (plan.id === "free") return "Downgrade to Free";
+  if (isPremiumUser.value) return "Manage Subscription";
   return "Upgrade Now";
 };
 
 const getPlanBorderClass = (plan: Plan): string => {
-  if (isCurrentPlan(plan)) return "";
+  if (isCurrentPlan(plan)) return "border-accent50 ring-2 ring-accent50/30";
   if (plan.featured) return "border-accent100";
   return "border-gray-200";
 };
 
 const handlePlanSelection = async (plan: Plan) => {
-  if (!Array.isArray(plan.prices) || !plan.prices[0]?.id) {
-    alert("No price available for this plan.");
-    return;
-  }
-
-  if (plan.name === "Free/Basic") {
+  // Free plan downgrade
+  if (plan.id === "free") {
     if (isPremiumUser.value) {
       const confirmed = confirm(
         "Are you sure you want to downgrade to the Free plan? You'll lose access to premium features at the end of your billing period."
       );
       if (confirmed) {
-        // Open billing portal to cancel
-        const { manageBilling } = usePremium();
-        await manageBilling();
+        await premium.manageBilling();
       }
     }
     return;
   }
 
+  // Paid plan — must be logged in
   if (!user.value) {
     router.push("/login");
     return;
   }
 
+  // Must have a valid price ID
+  if (!Array.isArray(plan.prices) || !plan.prices[0]?.id) {
+    alert("No price available for this plan.");
+    return;
+  }
+
+  // Already premium — open billing portal to manage
+  if (isPremiumUser.value) {
+    await premium.manageBilling();
+    return;
+  }
+
   try {
     loadingPlan.value = plan.id;
-    // upgradeUser redirects to Stripe Checkout — no return value needed
-    await upgradeUser(plan.prices[0].id);
+    await premium.upgradeUser(plan.prices[0].id);
   } catch (error) {
     console.error("Subscription error:", error);
     alert("There was an error processing your subscription. Please try again.");

@@ -1,12 +1,8 @@
 <template>
-  <div
-    class="min-h-screen bg-background100 flex items-center justify-center p-4"
-  >
+  <div class="min-h-screen bg-background100 flex items-center justify-center p-4">
     <!-- Loading state while syncing -->
     <div v-if="isSyncing" class="flex flex-col items-center gap-4 text-center">
-      <div
-        class="animate-spin rounded-full h-10 w-10 border-b-2 border-accent100"
-      ></div>
+      <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-accent100"></div>
       <p class="text-textblack100 font-medium">Activating your plan…</p>
     </div>
 
@@ -23,16 +19,8 @@
 
       <div class="mb-6 flex justify-center">
         <div class="relative">
-          <div
-            class="w-20 h-20 rounded-full bg-accent100/10 flex items-center justify-center animate-check-bounce"
-          >
-            <svg
-              width="40"
-              height="40"
-              viewBox="0 0 80 80"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
+          <div class="w-20 h-20 rounded-full bg-accent100/10 flex items-center justify-center animate-check-bounce">
+            <svg width="40" height="40" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path
                 d="M20 42L32 54L60 26"
                 stroke="#006e63"
@@ -44,44 +32,21 @@
               />
             </svg>
           </div>
-          <!-- Confetti dots -->
-          <div
-            class="absolute -top-2 -right-2 w-3 h-3 rounded-full bg-accent50 animate-ping"
-          ></div>
-          <div
-            class="absolute -bottom-1 -left-2 w-2 h-2 rounded-full bg-highlight animate-ping"
-            style="animation-delay: 0.3s"
-          ></div>
+          <div class="absolute -top-2 -right-2 w-3 h-3 rounded-full bg-accent50 animate-ping"></div>
+          <div class="absolute -bottom-1 -left-2 w-2 h-2 rounded-full bg-highlight animate-ping" style="animation-delay: 0.3s"></div>
         </div>
       </div>
 
-      <h1 class="text-2xl font-semibold text-textblack200 mb-2">
-        You're all set! 🎉
-      </h1>
+      <h1 class="text-2xl font-semibold text-textblack200 mb-2">You're all set! 🎉</h1>
       <p class="text-textblack100 mb-8 leading-relaxed">
-        Your premium plan is now active. Enjoy unlimited voyages,<br
-          class="hidden sm:block"
-        />
+        Your premium plan is now active. Enjoy unlimited voyages,<br class="hidden sm:block" />
         multi-image uploads, and PDF exports.
       </p>
 
-      <!-- Premium perks summary -->
-      <div
-        class="bg-white rounded-xl border border-gray-100 shadow-sm p-5 mb-8 text-left space-y-3"
-      >
-        <p
-          class="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3"
-        >
-          What you unlocked
-        </p>
-        <div
-          v-for="perk in perks"
-          :key="perk.label"
-          class="flex items-center gap-3"
-        >
-          <div
-            class="w-7 h-7 rounded-full bg-accent100/10 flex items-center justify-center flex-shrink-0"
-          >
+      <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5 mb-8 text-left space-y-3">
+        <p class="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">What you unlocked</p>
+        <div v-for="perk in perks" :key="perk.label" class="flex items-center gap-3">
+          <div class="w-7 h-7 rounded-full bg-accent100/10 flex items-center justify-center flex-shrink-0">
             <span class="text-sm">{{ perk.icon }}</span>
           </div>
           <span class="text-sm text-textblack100">{{ perk.label }}</span>
@@ -94,10 +59,7 @@
       >
         Start Creating
       </button>
-
-      <p class="mt-4 text-xs text-gray-400">
-        Manage billing anytime in your account settings
-      </p>
+      <p class="mt-4 text-xs text-gray-400">Manage billing anytime in your account settings</p>
     </div>
   </div>
 </template>
@@ -123,69 +85,62 @@ const perks = [
   { icon: "✈️", label: "Up to 50 voyage entries" },
 ];
 
-const goToVoyages = () => {
-  router.push("/voyages");
-};
+const goToVoyages = () => router.push("/voyages");
 
 onMounted(async () => {
-  try {
-    // Optimistically set premium so the app feels instant
-    setPremiumPlan();
+  // ✅ FIX 7: Optimistically set premium immediately so the UI
+  // feels instant, then confirm from server. The shared ref in
+  // usePremium means all components see this update right away.
+  setPremiumPlan();
 
-    // Then confirm from server (webhook may already have fired)
-    await checkStatus();
-  } catch (err) {
-    console.error("Error syncing premium status:", err);
-    // Keep optimistic update — webhook will sync eventually
-    setPremiumPlan();
-    showToast("Premium activated! Full sync may take a moment.", "info");
-  } finally {
-    isSyncing.value = false;
+  // Poll a few times to wait for the Stripe webhook to fire
+  // and update the DB, then confirm the real status.
+  let attempts = 0;
+  const maxAttempts = 5;
+  const pollInterval = 2000; 
+  const poll = async () => {
+    try {
+      await checkStatus();
+    } catch (err) {
+      console.error("Error syncing premium status:", err);
+    }
 
-    // Trigger animations
-    requestAnimationFrame(() => {
-      isVisible.value = true;
-      setTimeout(() => {
-        checkOffset.value = 0;
-      }, 600);
-    });
-  }
+    attempts++;
+    if (attempts < maxAttempts) {
+      setTimeout(poll, pollInterval);
+    } else {
+      // After polling, if still not confirmed, keep the optimistic update
+      // — the webhook will eventually sync and update on next app load.
+      if (!usePremium().isPremium) {
+        setPremiumPlan(); // keep optimistic
+        showToast("Premium activated! Full sync may take a moment.", "info");
+      }
+    }
+  };
+
+  // Start polling after a short delay to give webhook time to fire
+  setTimeout(poll, 1500);
+
+  isSyncing.value = false;
+  requestAnimationFrame(() => {
+    isVisible.value = true;
+    setTimeout(() => { checkOffset.value = 0; }, 600);
+  });
 });
 </script>
 
 <style scoped>
-.animate-fade-in {
-  animation: fadeIn 0.5s ease-out forwards;
-}
-
-.animate-check-bounce {
-  animation: checkBounce 0.5s ease-out 0.3s both;
-}
+.animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
+.animate-check-bounce { animation: checkBounce 0.5s ease-out 0.3s both; }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
 }
-
 @keyframes checkBounce {
-  0% {
-    transform: scale(0.6);
-  }
-  60% {
-    transform: scale(1.15);
-  }
-  100% {
-    transform: scale(1);
-  }
+  0% { transform: scale(0.6); }
+  60% { transform: scale(1.15); }
+  100% { transform: scale(1); }
 }
-
-.animate-check-draw {
-  transition: stroke-dashoffset 0.8s ease-out;
-}
+.animate-check-draw { transition: stroke-dashoffset 0.8s ease-out; }
 </style>

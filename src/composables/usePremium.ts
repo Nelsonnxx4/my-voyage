@@ -27,28 +27,24 @@ export interface PremiumFeatures {
   setPremiumPlan: () => void;
 }
 
+const userPlan = ref<PlanLimits>({
+  maxImagesPerEntry: 1,
+  maxVoyageEntries: 10,
+  maxPinnedLocations: 2,
+  canExportPdf: false,
+  canShareSocial: true,
+  isPremium: false,
+});
+const loading = ref(false);
+const error = ref<Error | null>(null);
+
 export const usePremium = (userId?: string): PremiumFeatures => {
-  const userPlan = ref<PlanLimits>({
-    maxImagesPerEntry: 1,
-    maxVoyageEntries: 10,
-    maxPinnedLocations: 2,
-    canExportPdf: false,
-    canShareSocial: true,
-    isPremium: false,
-  });
-
-  const loading = ref(false);
-  const error = ref<Error | null>(null);
-
   const getCurrentUserId = async (): Promise<string> => {
     if (userId) return userId;
-
     const {
       data: { user },
     } = await supabase.auth.getUser();
-    if (!user) {
-      throw new Error("No user authenticated");
-    }
+    if (!user) throw new Error("No user authenticated");
     return user.id;
   };
 
@@ -77,11 +73,9 @@ export const usePremium = (userId?: string): PremiumFeatures => {
   const loadUserPlan = async () => {
     loading.value = true;
     error.value = null;
-
     try {
       const currentUserId = await getCurrentUserId();
       const isUserPremium = await checkPremiumStatus(currentUserId);
-
       if (isUserPremium) {
         setPremiumPlan();
       } else {
@@ -103,7 +97,6 @@ export const usePremium = (userId?: string): PremiumFeatures => {
   const upgradeUser = async (priceId: string) => {
     loading.value = true;
     error.value = null;
-
     try {
       await initiatePremiumCheckout(priceId);
     } catch (err) {
@@ -118,7 +111,6 @@ export const usePremium = (userId?: string): PremiumFeatures => {
   const manageBilling = async () => {
     loading.value = true;
     error.value = null;
-
     try {
       await manageSubscription();
     } catch (err) {
@@ -131,13 +123,17 @@ export const usePremium = (userId?: string): PremiumFeatures => {
   };
 
   return {
-    isPremium: userPlan.value.isPremium,
-    limits: userPlan.value,
+    get isPremium() {
+      return userPlan.value.isPremium;
+    },
     get loading() {
       return loading.value;
     },
     get error() {
       return error.value;
+    },
+    get limits() {
+      return userPlan.value;
     },
     checkStatus,
     upgradeUser,
