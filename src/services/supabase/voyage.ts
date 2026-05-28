@@ -85,7 +85,7 @@ export const fetchVoyageById = async (
     const response = await supabaseApi.get(`/voyages`, {
       headers: {
         Authorization: `Bearer ${session.access_token}`,
-        apiKey: import.meta.env.VITE_SUPABASE_KEY,
+        apiKey: import.meta.env.VITE_SUPABASE_ANON_KEY,
         "Content-Type": "application/json",
       },
       params: {
@@ -161,7 +161,7 @@ export const createVoyage = async (
     const response = await supabaseApi.post("/voyages", voyageData, {
       headers: {
         Authorization: `Bearer ${session.access_token}`,
-        apikey: import.meta.env.VITE_SUPABASE_KEY,
+        apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
         "Content-Type": "application/json",
         Prefer: "return=representation",
       },
@@ -237,7 +237,7 @@ export const updateVoyage = async (
     const response = await supabaseApi.patch(`/voyages`, updateData, {
       headers: {
         Authorization: `Bearer ${session.access_token}`,
-        apikey: import.meta.env.VITE_SUPABASE_KEY,
+        apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
         "Content-Type": "application/json",
         Prefer: "return=representation",
       },
