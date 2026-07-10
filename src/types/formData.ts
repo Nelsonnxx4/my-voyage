@@ -8,5 +8,11 @@ export type FormDataType = {
   rating: number;
   latitude?: number | null;
   longitude?: number | null;
-  pins?: { display_name: string; lat: number; lon: number }[];
+  pins?: {
+    place_id?: string;
+    display_name: string;
+    lat: number;
+    lon: number;
+    boundingbox?: string[];
+  }[];
 };

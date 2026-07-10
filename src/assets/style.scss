@@ -12,6 +12,11 @@ body {
   color: #717171;
 }
 
+html.dark body {
+  background-color: #121212;
+  color: #e0e0e0;
+}
+
 h1 {
   font-size: 3rem;
 }

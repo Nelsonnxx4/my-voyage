@@ -112,13 +112,7 @@ export const createVoyage = async (
   try {
     console.log("Starting voyage creation with data:", voyage);
 
-    const requiredFields = [
-      "title",
-      "location",
-      "start_date",
-      "end_date",
-      "notes",
-    ];
+    const requiredFields = ["title", "location", "start_date", "end_date"];
 
     for (const field of requiredFields) {
       if (!voyage[field as keyof FormDataType]) {
@@ -154,6 +148,7 @@ export const createVoyage = async (
       rating: voyage.rating || 0,
       latitude: voyage.latitude,
       longitude: voyage.longitude,
+      pins: voyage.pins || [],
       user_id: session.user.id,
       created_at: new Date().toISOString(),
     };
@@ -233,6 +228,7 @@ export const updateVoyage = async (
       updateData.end_date = formatDate(data.end_date);
     if (data.rating !== undefined) updateData.rating = data.rating;
     if (data.image_urls !== undefined) updateData.image_urls = data.image_urls;
+    if (data.pins !== undefined) updateData.pins = data.pins;
 
     const response = await supabaseApi.patch(`/voyages`, updateData, {
       headers: {

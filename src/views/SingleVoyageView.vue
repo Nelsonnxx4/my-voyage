@@ -22,7 +22,7 @@
     </div>
 
     <div
-      class="flex justify-center items-center uppercase rounded-full outline outline-accent50 hover:outline-[#6fa198] outline-offset-2 w-7 h-6 cursor-pointer m-2"
+      class="flex justify-center items-center uppercase rounded-full outline outline-accent50 hover:outline-[#6fa198] outline-offset-2 w-7 h-7 cursor-pointer m-2"
       @click="openProfileModal"
     >
       <UTooltip :text="userData?.name">

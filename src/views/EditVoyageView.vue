@@ -51,6 +51,7 @@
             :ref="(el) => { fileInput = el as HTMLInputElement | null }"
             @change="handleImageUpload"
             accept="image/*"
+            :multiple="isPremium"
             class="hidden"
           />
 
@@ -209,103 +210,43 @@
             placeholder="A weekend in Monaco"
           />
 
-          <!-- <div class="space-y-2">
+          <div class="space-y-2">
             <label class="block text-textblack100 font-medium">Location</label>
 
-            <div class="flex gap-3">
-              <div class="flex-1 relative">
-                <input
-                  type="text"
-                  v-model="locationSearch"
-                  @input="searchLocation"
-                  placeholder="Search for a city or address"
-                  class="w-full p-2 border rounded focus:ring-2 focus:ring-accent50 focus:border-transparent"
-                />
-
-                <div v-if="isSearching" class="absolute right-3 top-3">
-                  <Spinner />
-                </div>
-                <ul
-                  v-if="locationSuggestions.length > 0"
-                  class="absolute z-20 w-full mt-1 bg-white border rounded shadow-lg max-h-60 overflow-auto"
-                >
-                  <li
-                    v-for="suggestion in locationSuggestions"
-                    :key="suggestion.place_id || suggestion.display_name"
-                    @click="selectAndPinSuggestion(suggestion)"
-                    class="p-2 hover:bg-gray-100 cursor-pointer border-b last:border-b-0"
-                  >
-                    {{ suggestion.display_name }}
-                  </li>
-                </ul>
-              </div>
+            <div
+              v-if="isPremium"
+              class="premium-badge bg-accent50 text-white px-3 py-1 rounded-lg text-sm inline-block"
+            >
+              <i class="fas fa-crown"></i>
+              Premium - Pin up to {{ maxPinnedLocations }} locations
+            </div>
+            <div
+              v-else
+              class="free-tier-info bg-gray-100 px-3 py-2 rounded-lg text-sm"
+            >
+              Free Tier - {{ formData.pins?.length ?? 0 }}/{{
+                maxPinnedLocations
+              }}
+              pins used
 
               <button
                 type="button"
-                @click="useCurrentLocation"
-                class="px-3 py-2 bg-gray-100 rounded hover:bg-gray-200 transition-colors flex items-center gap-2 whitespace-nowrap"
+                @click="upgradeToPremium"
+                class="upgrade-btn underline text-accent100 ml-2"
               >
-                <LocationIcon size="24" />
-                <span class="hidden sm:inline">My Location</span>
+                Upgrade for more pins
               </button>
             </div>
-            <MapView />-->
 
-          <!-- Pin Controls -->
-          <!-- <div class="mt-3 p-3 bg-gray-50 rounded-lg border">
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-sm font-medium text-gray-700">
-                  Pinned Locations ({{ pins.length }}/{{ maxPinnedLocations }})
-                </span>
-                <button
-                  type="button"
-                  @click="pinSelectedLocation"
-                  :disabled="!selectedLocation || reachedPinLimit"
-                  class="px-3 py-1 text-sm bg-accent50 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-accent70 transition-colors"
-                  :title="
-                    reachedPinLimit
-                      ? 'Pin limit reached. Upgrade for more pins.'
-                      : 'Pin the selected location'
-                  "
-                >
-                  Pin This Spot
-                </button>
-              </div>
-
-              <div
-                v-if="!isPremium && reachedPinLimit"
-                class="text-xs text-orange-600 mb-2"
-              >
-                Free users can pin up to {{ maxPinnedLocations }} locations.
-                <button
-                  type="button"
-                  @click="upgradeToPremium"
-                  class="underline font-medium"
-                >
-                  Upgrade for {{ 8 - maxPinnedLocations }} more pins
-                </button>
-              </div>
-            </div> -->
-
-          <!-- Pinned List -->
-          <!-- <div v-if="pins.length" class="mt-2 border rounded p-2 bg-white">
-              <div
-                v-for="(p, i) in pins"
-                :key="i"
-                class="flex items-center justify-between py-2 border-b last:border-b-0"
-              >
-                <div class="text-sm flex-1">
-                  <p class="font-medium truncate max-w-[300px]">
-                    {{ p.display_name }}
-                  </p>
-                  <p class="text-gray-500 text-xs">
-                    {{ p.lat.toFixed(4) }}, {{ p.lon.toFixed(4) }}
-                  </p>
-                </div>
-                
-              </div>
-            </div>
-          </div> -->
+            <MapView
+              v-model="selectedLocation"
+              v-model:pins="formData.pins"
+              :multiple="isPremium"
+              :max-pins="maxPinnedLocations"
+              map-height="400px"
+              :initial-zoom="13"
+            />
+          </div>
 
           <!-- Date range -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
@@ -383,7 +324,7 @@
 
 <script setup lang="ts">
 // imports from vue
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 // imports from PrimeVue
 import Editor from "primevue/editor";
@@ -394,7 +335,7 @@ import EditVoyageSkeleton from "@/components/ui/EditVoyageSkeleton.vue";
 import ReusableButton from "@/components/ui/ReusableButton.vue";
 import ReusableInput from "@/components/ui/ReusableInput.vue";
 import Spinner from "@/components/ui/Spinner.vue";
-// import MapView from "@/components/MapView.vue";
+import MapView from "@/components/MapView.vue";
 // imports from icons
 import EditIcon from "@/assets/icons/EditIcon.vue";
 import CloseIcon from "@/assets/icons/CloseIcon.vue";
@@ -406,10 +347,8 @@ import RotateLeft from "@/assets/icons/RotateLeft.vue";
 // imports from composables/functions/types
 import { useVoyageManager } from "@/composables/useVoyageManager";
 import { useImageUpload } from "@/composables/useImageUpload";
-// import { useMap } from "@/composables/useMap";
 import { usePremium } from "@/composables/usePremium";
 import { genUtils } from "@/utils/genUtils";
-// import type { LocationSuggestion } from "@/types/mapTypes";
 import { type FormDataType } from "@/types/formData";
 // import { type VoyageTypeInfo } from "@/types/voyage";
 import { showToast } from "@/utils/showToast";
@@ -480,25 +419,29 @@ const {
   showEmptyState,
   activeIndex,
   canAddMoreImages,
+  uploadImagesToSupabase,
+  tempImages,
   isPremium,
   maxImagesPerEntry,
 } = useImageUpload(formData);
 
-const { loadUserPlan } = usePremium();
+const { limits, loadUserPlan } = usePremium();
+const maxPinnedLocations = computed(() => limits.maxPinnedLocations);
 
-// const {
-//   selectedLocation,
-//   locationSearch,
-//   locationSuggestions,
-//   isSearching,
-//   pins,
-//   searchLocation,
-//   selectSuggestion,
-//   useCurrentLocation,
-//   addPin,
-//   removePinAt,
-//   maxPinnedLocations,
-// } = useMap();
+const selectedLocation = ref<any>(null);
+
+// Watch location selection
+watch(selectedLocation, (newLocation) => {
+  if (newLocation) {
+    formData.value.location = newLocation.display_name;
+    formData.value.latitude = newLocation.lat;
+    formData.value.longitude = newLocation.lon;
+  } else {
+    formData.value.location = "";
+    formData.value.latitude = null;
+    formData.value.longitude = null;
+  }
+});
 
 // Keep original for diffing
 const original = ref<VoyageTypeInfo | null>(null);
@@ -578,20 +521,15 @@ const load = async () => {
       }
     }
 
-    // // Set location if exists
-    // if (v.location && v.latitude && v.longitude) {
-    //   selectedLocation.value = {
-    //     display_name: v.location,
-    //     lat: v.latitude,
-    //     lon: v.longitude,
-    //   };
-    //   locationSearch.value = v.location;
-    // }
-
-    // // Load existing pins
-    // if (v.pins && Array.isArray(v.pins)) {
-    //   pins.value = [...v.pins];
-    // }
+    // Set location if exists (primary location = first pin)
+    if (v.location && v.latitude && v.longitude) {
+      selectedLocation.value = {
+        place_id: `${v.latitude}-${v.longitude}`,
+        display_name: v.location,
+        lat: v.latitude,
+        lon: v.longitude,
+      };
+    }
 
     console.log(
       "Loaded voyage with",
@@ -644,44 +582,31 @@ const buildUpdates = () => {
   if (formData.value.longitude !== (original.value.longitude ?? null))
     updates.longitude = formData.value.longitude;
 
-  // // Compare pins
-  // const origPins = original.value.pins ?? [];
-  // if (JSON.stringify(pins.value) !== JSON.stringify(origPins))
-  //   updates.pins = pins.value;
+  // Compare pins
+  const origPins = original.value.pins ?? [];
+  const currentPins = formData.value.pins ?? [];
+  if (JSON.stringify(currentPins) !== JSON.stringify(origPins))
+    updates.pins = currentPins;
 
   return updates;
 };
-
-// const reachedPinLimit = computed(
-//   () => pins.value.length >= maxPinnedLocations.value
-// );
-
-// Auto-pin when selecting suggestion
-// const selectAndPinSuggestion = (suggestion: LocationSuggestion) => {
-//   selectSuggestion(suggestion);
-
-//   // Auto-pin the selected location if not at limit
-//   if (!reachedPinLimit.value) {
-//     setTimeout(() => {
-//       pinSelectedLocation();
-//     }, 100);
-//   }
-// };
-
-// const pinSelectedLocation = () => {
-//   if (!selectedLocation.value) return;
-
-//   const success = addPin(selectedLocation.value);
-//   if (!success && reachedPinLimit.value) {
-//     showToast("Pin limit reached. Upgrade for more pins.", "warning");
-//   }
-// };
 
 const handleEditVoyage = async () => {
   if (!voyage.value?.id) return;
 
   isSubmitting.value = true;
   try {
+    const uploadedImageUrls = await uploadImagesToSupabase();
+
+    if (uploadedImageUrls.length === 0 && tempImages.value.length > 0) {
+      throw new Error("Image upload failed. Please try again.");
+    }
+
+    formData.value = {
+      ...formData.value,
+      image_urls: uploadedImageUrls,
+    };
+
     const updates = buildUpdates();
 
     if (Object.keys(updates).length === 0) {
@@ -707,15 +632,6 @@ const handleEditVoyage = async () => {
   }
 };
 
-// Watch pins for changes
-// watch(
-//   pins,
-//   (nv) => {
-//     formData.value.pins = nv;
-//   },
-//   { deep: true }
-// );
-
 interface DateRange extends Array<Date> {
   0: Date;
   1: Date;
@@ -738,19 +654,6 @@ const dateRange = ref<DateRange | null>(null);
 //   const date = new Date();
 //   date.setFullYear(date.getFullYear() + 1);
 //   return date;
-// });
-
-// Watch for location changes and update form data
-// watch(selectedLocation, (newLocation) => {
-//   if (newLocation) {
-//     formData.value.location = newLocation.display_name;
-//     formData.value.latitude = newLocation.lat;
-//     formData.value.longitude = newLocation.lon;
-//   } else {
-//     formData.value.location = "";
-//     formData.value.latitude = null;
-//     formData.value.longitude = null;
-//   }
 // });
 
 const typedHandles = handles as HandleKey[];

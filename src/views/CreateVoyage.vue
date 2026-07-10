@@ -42,6 +42,7 @@
             :ref="(el) => { fileInput = el as HTMLInputElement | null }"
             @change="handleImageUpload"
             accept="image/*"
+            :multiple="isPremium"
             class="hidden"
           />
 
@@ -200,18 +201,36 @@
           <div class="space-y-2">
             <label class="block text-textblack100 font-medium">Location</label>
 
-            <!-- <div class="flex-1 relative">
-              <input
-                type="text"
-                v-model="locationSearch"
-                @input="searchLocation"
-                placeholder="Search for a city or address"
-                class="w-full p-2 border rounded focus:ring-2 focus:ring-accent50 focus:border-transparent"
-              />
-            </div> -->
+            <div
+              v-if="isPremium"
+              class="premium-badge bg-accent50 text-white px-3 py-1 rounded-lg text-sm inline-block"
+            >
+              <i class="fas fa-crown"></i>
+              Premium - Pin up to {{ maxPinnedLocations }} locations
+            </div>
+            <div
+              v-else
+              class="free-tier-info bg-gray-100 px-3 py-2 rounded-lg text-sm"
+            >
+              Free Tier - {{ formData.pins?.length ?? 0 }}/{{
+                maxPinnedLocations
+              }}
+              pins used
+
+              <button
+                type="button"
+                @click="upgradeToPremium"
+                class="upgrade-btn underline text-accent100 ml-2"
+              >
+                Upgrade for more pins
+              </button>
+            </div>
 
             <MapView
               v-model="selectedLocation"
+              v-model:pins="formData.pins"
+              :multiple="isPremium"
+              :max-pins="maxPinnedLocations"
               map-height="400px"
               :initial-zoom="13"
             />
@@ -326,6 +345,7 @@ const {
   isDetailLoading,
   navigateToVoyages,
   handleCreateVoyage,
+  handleFetchVoyages,
   formData,
   voyages,
 } = useVoyageManager();
@@ -370,6 +390,7 @@ const {
 } = useImageUpload(formData);
 
 const { limits, loadUserPlan } = usePremium();
+const maxPinnedLocations = computed(() => limits.maxPinnedLocations);
 
 const selectedLocation = ref<any>(null);
 
@@ -388,6 +409,7 @@ watch(selectedLocation, (newLocation) => {
 
 onMounted(async () => {
   await loadUserPlan();
+  await handleFetchVoyages();
   // Set loading to false since create page doesn't need to load data
   isDetailLoading.value = false;
   // // const isStorageReady = await setupStorageBucket();

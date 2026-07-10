@@ -8,8 +8,10 @@
 import { onMounted } from "vue";
 import ToastContainer from "@/components/ui/ToastContainer.vue";
 import { useAuth } from "@/composables/useAuth";
+import { useTheme } from "@/composables/useTheme";
 
 const { checkAuth } = useAuth();
+useTheme();
 
 onMounted(() => {
   checkAuth();

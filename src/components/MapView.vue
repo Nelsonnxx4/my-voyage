@@ -46,9 +46,9 @@
       :style="{ height: mapHeight }"
     ></div>
 
-    <!-- Selected Location Info -->
+    <!-- Selected Location Info (single-pin mode only) -->
     <div
-      v-if="!props.readonly && selectedLocation"
+      v-if="!props.readonly && !props.multiple && selectedLocation"
       class="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200"
     >
       <div class="flex justify-between items-start">
@@ -81,11 +81,53 @@
         </button>
       </div>
     </div>
+
+    <!-- Pinned Locations (multi-pin mode) -->
+    <div
+      v-if="!props.readonly && props.multiple"
+      class="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200"
+    >
+      <div class="flex items-center justify-between mb-2">
+        <span class="text-sm font-medium text-gray-700">
+          Pinned Locations ({{ pins.length }}/{{ maxPins }})
+        </span>
+      </div>
+
+      <p v-if="pins.length === 0" class="text-sm text-gray-500">
+        Search or click on the map to pin a location.
+      </p>
+
+      <div v-if="atPinLimit" class="text-xs text-orange-600 mb-2">
+        Pin limit reached. Remove a pin to add a different one.
+      </div>
+
+      <ul v-if="pins.length" class="divide-y">
+        <li
+          v-for="(pin, i) in pins"
+          :key="`${pin.place_id}-${i}`"
+          class="flex items-center justify-between py-2"
+        >
+          <div class="text-sm flex-1 min-w-0">
+            <p class="font-medium truncate">{{ pin.display_name }}</p>
+            <p class="text-gray-500 text-xs">
+              {{ pin.lat.toFixed(4) }}, {{ pin.lon.toFixed(4) }}
+            </p>
+          </div>
+          <button
+            type="button"
+            @click="removePin(i)"
+            class="text-red-600 hover:text-red-700 ml-2 text-xs shrink-0"
+          >
+            Remove
+          </button>
+        </li>
+      </ul>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch } from "vue";
+import { ref, onMounted, onUnmounted, watch, computed } from "vue";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
@@ -103,7 +145,7 @@ const DefaultIcon = L.icon({
 L.Marker.prototype.options.icon = DefaultIcon;
 
 interface LocationResult {
-  place_id: string;
+  place_id?: string;
   display_name: string;
   lat: number;
   lon: number;
@@ -112,12 +154,18 @@ interface LocationResult {
 
 interface Props {
   modelValue?: LocationResult | null;
+  pins?: LocationResult[];
+  multiple?: boolean;
+  maxPins?: number;
   mapHeight?: string;
   initialZoom?: number;
   readonly?: boolean; // hides search bar; used on SingleVoyageView
 }
 
 const props = withDefaults(defineProps<Props>(), {
+  pins: () => [],
+  multiple: false,
+  maxPins: Infinity,
   mapHeight: "400px",
   initialZoom: 13,
   readonly: false,
@@ -125,6 +173,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<{
   "update:modelValue": [value: LocationResult | null];
+  "update:pins": [value: LocationResult[]];
 }>();
 
 // State
@@ -136,6 +185,11 @@ const searchResults = ref<LocationResult[]>([]);
 const selectedLocation = ref<LocationResult | null>(props.modelValue || null);
 const isSearching = ref(false);
 
+// Multi-pin state
+const pins = ref<LocationResult[]>([...(props.pins || [])]);
+const pinMarkers = ref<L.Marker[]>([]);
+const atPinLimit = computed(() => pins.value.length >= props.maxPins);
+
 // Debounce timer
 let searchTimeout: ReturnType<typeof setTimeout>;
 
@@ -143,9 +197,11 @@ let searchTimeout: ReturnType<typeof setTimeout>;
 onMounted(() => {
   if (!mapContainer.value) return;
 
+  const initialPin = props.multiple ? pins.value[0] : selectedLocation.value;
+
   // Create map centered on a default location
-  const defaultCenter: [number, number] = selectedLocation.value
-    ? [selectedLocation.value.lat, selectedLocation.value.lon]
+  const defaultCenter: [number, number] = initialPin
+    ? [initialPin.lat, initialPin.lon]
     : [51.505, -0.09]; // London as default
 
   map.value = L.map(mapContainer.value).setView(
@@ -165,8 +221,10 @@ onMounted(() => {
     map.value.on("click", handleMapClick);
   }
 
-  // If there's an initial location, add a marker
-  if (selectedLocation.value) {
+  // Render initial marker(s)
+  if (props.multiple) {
+    pins.value.forEach((pin) => addPinMarker(pin));
+  } else if (selectedLocation.value) {
     addMarker(selectedLocation.value.lat, selectedLocation.value.lon);
   }
 });
@@ -178,10 +236,11 @@ onUnmounted(() => {
   }
 });
 
-// Watch for external changes to modelValue
+// Watch for external changes to modelValue (single-pin mode)
 watch(
   () => props.modelValue,
   (newValue) => {
+    if (props.multiple) return;
     if (newValue && newValue !== selectedLocation.value) {
       selectedLocation.value = newValue;
       addMarker(newValue.lat, newValue.lon);
@@ -190,7 +249,21 @@ watch(
   }
 );
 
-// Add or update marker on map
+// Watch for external changes to pins (multi-pin mode)
+watch(
+  () => props.pins,
+  (newPins) => {
+    if (!props.multiple) return;
+    const incoming = newPins || [];
+    if (JSON.stringify(incoming) === JSON.stringify(pins.value)) return;
+    pins.value = [...incoming];
+    clearPinMarkers();
+    pins.value.forEach((pin) => addPinMarker(pin));
+  },
+  { deep: true }
+);
+
+// Add or update marker on map (single-pin mode)
 const addMarker = (lat: number, lon: number) => {
   if (!map.value) return;
 
@@ -204,6 +277,60 @@ const addMarker = (lat: number, lon: number) => {
 
   // Center map on marker
   map.value.setView([lat, lon], props.initialZoom);
+};
+
+// Add a marker for a pin (multi-pin mode)
+const addPinMarker = (pin: LocationResult) => {
+  if (!map.value) return;
+  const m = L.marker([pin.lat, pin.lon])
+    .bindPopup(pin.display_name)
+    .addTo(map.value);
+  pinMarkers.value.push(m);
+};
+
+const clearPinMarkers = () => {
+  pinMarkers.value.forEach((m) => map.value?.removeLayer(m));
+  pinMarkers.value = [];
+};
+
+// Shared handler for a newly resolved location (map click or search select)
+const handleNewLocation = (location: LocationResult) => {
+  if (!props.multiple) {
+    selectedLocation.value = location;
+    emit("update:modelValue", location);
+    addMarker(location.lat, location.lon);
+    return;
+  }
+
+  if (atPinLimit.value) return;
+
+  const wasEmpty = pins.value.length === 0;
+  pins.value = [...pins.value, location];
+  addPinMarker(location);
+  emit("update:pins", pins.value);
+
+  if (wasEmpty) {
+    emit("update:modelValue", location);
+  }
+
+  map.value?.setView([location.lat, location.lon], props.initialZoom);
+};
+
+const removePin = (index: number) => {
+  if (index < 0 || index >= pins.value.length) return;
+
+  const removingPrimary = index === 0;
+  pins.value = pins.value.filter((_, i) => i !== index);
+
+  const removedMarker = pinMarkers.value[index];
+  if (removedMarker) map.value?.removeLayer(removedMarker);
+  pinMarkers.value = pinMarkers.value.filter((_, i) => i !== index);
+
+  emit("update:pins", pins.value);
+
+  if (removingPrimary) {
+    emit("update:modelValue", pins.value[0] ?? null);
+  }
 };
 
 // Handle map click
@@ -224,9 +351,7 @@ const handleMapClick = async (e: L.LeafletMouseEvent) => {
       lon: parseFloat(data.lon),
     };
 
-    selectedLocation.value = location;
-    emit("update:modelValue", location);
-    addMarker(lat, lng);
+    handleNewLocation(location);
   } catch (error) {
     console.error("Error reverse geocoding:", error);
 
@@ -238,9 +363,7 @@ const handleMapClick = async (e: L.LeafletMouseEvent) => {
       lon: lng,
     };
 
-    selectedLocation.value = location;
-    emit("update:modelValue", location);
-    addMarker(lat, lng);
+    handleNewLocation(location);
   }
 };
 
@@ -286,11 +409,9 @@ const debouncedSearch = () => {
 
 // Select location from search results
 const selectLocation = (location: LocationResult) => {
-  selectedLocation.value = location;
-  emit("update:modelValue", location);
+  handleNewLocation(location);
   searchResults.value = [];
-  searchQuery.value = location.display_name;
-  addMarker(location.lat, location.lon);
+  searchQuery.value = props.multiple ? "" : location.display_name;
 };
 
 // Clear search
@@ -299,7 +420,7 @@ const clearSearch = () => {
   searchResults.value = [];
 };
 
-// Clear selection
+// Clear selection (single-pin mode)
 const clearSelection = () => {
   selectedLocation.value = null;
   emit("update:modelValue", null);
