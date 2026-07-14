@@ -1,12 +1,23 @@
 import { ref, computed, watch, onMounted, onUnmounted } from "vue";
+import { useRoute } from "vue-router";
 
 export type Theme = "light" | "dark" | "system";
 
 export const useTheme = () => {
+  const route = useRoute();
   const theme = ref<Theme>("system");
   const systemTheme = ref<"light" | "dark">("light");
 
+  // Dark mode is scoped to the /voyages section of the app; the landing
+  // page and auth screens (login/signup) always render in light mode.
+  const isThemeableRoute = computed(() =>
+    route.path.startsWith("/voyages")
+  );
+
   const actualTheme = computed(() => {
+    if (!isThemeableRoute.value) {
+      return "light";
+    }
     if (theme.value === "system") {
       return systemTheme.value;
     }
@@ -121,7 +132,7 @@ export const useTheme = () => {
 
   // Watch for theme changes and apply them
   watch(
-    [theme, systemTheme],
+    [theme, systemTheme, isThemeableRoute],
     () => {
       applyTheme();
     },
